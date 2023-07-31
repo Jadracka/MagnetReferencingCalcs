@@ -1,11 +1,23 @@
 # Header
 # Format: spherical
-# Units: [gons | radians | degrees] [gons | radians | degrees] [m | mm | cm]
+# Units: [gons | radians | mrad | degrees] [um | mm | cm | m]
 
 # Data
-point_number azimuth zenith_angle distance
+PointID azimuth zenith_angle distance
 1 45 30 2.5
 2 120 60 0.5
 3 200 45 0.8
 4 320 70 200
 5 45 40 150
+
+How to use it:
+The decimal delimiter can be . or ,
+# Header
+# Format: spherical
+# Units: gon m
+
+# Data
+PointID azimuth zenith_angle distance
+1 45 30 2.5
+2 120 60 0.5
+3 200 45 0.8

@@ -1,0 +1,11 @@
+# Header
+# Format: cartesian
+# Units: [um | mm | cm | m] [um | mm | cm | m] [um | mm | cm | m]
+
+# Data
+point_number X Y Z
+1 100 50 30
+2 80 40 20
+3 120 60 25
+4 90 45 35
+5 110 55 28
