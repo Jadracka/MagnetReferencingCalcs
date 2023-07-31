@@ -226,24 +226,19 @@ def fit_circle_3d(data_dict, output_units):
         return None
 
     # Scale the output based on output_units from config.py
-    center_scale = 1.0
-    radius_scale = 1.0
+    result_scale = 1.0
 
-    if output_units["center"] == "m":
-        center_scale = 0.001
-        radius_scale = 0.001
-    elif output_units["center"] == "cm":
-        center_scale = 0.01
-        radius_scale = 0.01
-    elif output_units["center"] == "mm":
-        center_scale = 1.0
-        radius_scale = 1.0
-    elif output_units["center"] == "um":
-        center_scale = 1000.0
-        radius_scale = 1000.0
+    if output_units["distances"] == "m":
+        result_scale = 0.001
+    elif output_units["distances"] == "cm":
+        result_scale = 0.01
+    elif output_units["distances"] == "mm":
+        result_scale = 1.0
+    elif output_units["distances"] == "um":
+        result_scale = 1000.0
    
 
     # Scale the output
-    center_x, center_y, center_z, radius = center_x * center_scale, center_y * center_scale, center_z * center_scale, radius * radius_scale
+    center_x, center_y, center_z, radius = center_x * result_scale, center_y * result_scale, center_z * result_scale, radius * result_scale
 
     return center_x, center_y, center_z, radius

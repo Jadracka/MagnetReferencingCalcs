@@ -36,3 +36,4 @@ data_file = "Points_circle_test.txt"
 
 # Create the full file path by joining the current directory and the subfolder name
 circle_file = os.path.join(current_dir, data_folder, data_file)
+

@@ -1,6 +1,6 @@
 # Header
 # Format: spherical
-# Units: gon m
+# Units: gon mm
 
 # Data
 0	-71,2831	102,8494	1065,984
