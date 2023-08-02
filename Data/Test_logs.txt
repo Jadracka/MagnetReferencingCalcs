@@ -1,0 +1,64 @@
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 16:39:53
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 16:40:34
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 16:40:53
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 16:41:37
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 16:49:08
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 17:00:55
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 17:01:43
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 17:02:30
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-02 17:13:38
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+

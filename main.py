@@ -7,6 +7,8 @@ Created on Thu Jul 13 09:40:21 2023
 
 import numpy as np
 from scipy.optimize import least_squares
+import functions as fc
+import config as cg
 
 
 def fit_ellipse_lsm(x, y):
@@ -30,3 +32,14 @@ def fit_ellipse_lsm(x, y):
     """
     
     return a, b, center_x, center_y
+
+
+keyence3d = fc.fit_circle_3d(fc.read_data_from_file(cg.keyence_path), cg.output_units)
+keyence2d = fc.fit_circle_2d(fc.read_data_from_file(cg.keyence2d_path), cg.output_units, cg.logfile_path)
+LT = fc.fit_circle_3d(fc.read_data_from_file(cg.LT_path), cg.output_units_LT)
+plane_coefficients = fc.fit_plane_3d(fc.read_data_from_file(cg.LT_path), cg.output_units_LT, cg.log_statistics)
+
+data_dict, file_path = fc.read_data_from_file(cg.planeANDcircle_test_points_path)
+testing_plane_coefficients = fc.fit_plane_3d(fc.read_data_from_file(cg.planeANDcircle_test_points_path), cg.output_units_LT, cg.log_statistics)
+testing_circle_coefficients = fc.fit_circle_3d(fc.read_data_from_file(cg.planeANDcircle_test_points_path), cg.output_units_LT)
+

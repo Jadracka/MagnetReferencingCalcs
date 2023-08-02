@@ -7,6 +7,10 @@ Created on Fri Jul 28 13:54:12 2023
 
 import numpy as np
 from scipy.optimize import least_squares
+import datetime
+import inspect
+import os
+
 
 def gon_to_radians(gon):
     return gon * (2 * np.pi / 400)
@@ -67,9 +71,28 @@ def coordinate_unit_to_mm(unit):
     else:
         raise ValueError("Invalid coordinate unit specified.")
 
-def circle_residuals(params, x, y, z):
+def circle_residuals_3d(params, x, y, z):
     cx, cy, cz, r = params
     return (x - cx)**2 + (y - cy)**2 + (z - cz)**2 - r**2
+
+def get_variable_name(variable):
+    """# Example usage:
+        name = "John"
+        age = 30
+
+    variable_name_as_string = get_variable_name(name)
+    print(variable_name_as_string) 
+    prints 'name' """
+    # Get the calling frame
+    frame = inspect.currentframe().f_back
+    
+    # Find the variable name by checking the locals and globals dictionaries
+    for name, value in frame.f_locals.items():
+        if value is variable:
+            return name
+    for name, value in frame.f_globals.items():
+        if value is variable:
+            return name
 
 def generate_noisy_ellipse_points(a, b, center_x, center_y, num_points, std_dev):
     """
@@ -137,7 +160,6 @@ def get_unit_multiplier(unit):
         
 def read_data_from_file(file_path):
     data_dict = {}
-    point_ids_set = set()
 
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -158,53 +180,75 @@ def read_data_from_file(file_path):
             angle_unit = None
             d_unit = None
             coordinate_unit = units[0]
+        elif data_format == 'cartesian2d':  # New format for 2D Cartesian data
+            angle_unit = None
+            d_unit = None
+            coordinate_unit = units[0]
         else:
             raise ValueError("Invalid data format specified in the header.")
 
         # Process the data lines
-        for line_num, line in enumerate(lines[4:], start=5):
-            line = line.strip().split()
-            PointID = line[0]
+        line_number = 0
+        for line in lines:
+            line_number += 1
+            if not line.startswith('#'):
+                line = line.strip().split()
 
-            if PointID in point_ids_set:
-                raise ValueError(f"Duplicate PointID found in the data. Line number: {line_num}")
-            else:
-                point_ids_set.add(PointID)
+                # Skip empty lines
+                if not line:
+                    continue
 
-            if data_format == 'spherical':
-                azimuth = float(line[1].replace(',', '.'))
-                zenith_angle = float(line[2].replace(',', '.'))
-                distance = float(line[3].replace(',', '.'))
+                PointID = line[0]
 
-                # Convert spherical to Cartesian
-                x, y, z, coordinate_unit = spherical_to_cartesian(distance, angle_unit, azimuth, zenith_angle, d_unit)
+                if data_format == 'spherical':
+                    azimuth = float(line[1].replace(',', '.'))
+                    zenith_angle = float(line[2].replace(',', '.'))
+                    distance = float(line[3].replace(',', '.'))
 
-            elif data_format == 'cartesian':
-                x = float(line[1].replace(',', '.'))
-                y = float(line[2].replace(',', '.'))
-                z = float(line[3].replace(',', '.'))
+                    # Convert spherical to Cartesian
+                    x, y, z, coordinate_unit = spherical_to_cartesian_unit(distance, angle_unit, azimuth, zenith_angle, d_unit)
 
-            else:
-                raise ValueError("Invalid data format specified in the header.")
+                elif data_format == 'cartesian' or data_format == 'cartesian2d':
+                    x = float(line[1].replace(',', '.'))
+                    y = float(line[2].replace(',', '.'))
+                    z = None if len(line) < 4 else float(line[3].replace(',', '.'))  # Z coordinate for 3D Cartesian, None for 2D Cartesian
+                # Check for duplicate PointIDs
+                if PointID in data_dict:
+                    raise ValueError(f"Duplicate PointID '{PointID}' found in line {line_number}.")
 
-            # Store data in the dictionary
-            data_dict[PointID] = {
-                'Hz': azimuth if azimuth is not None else None,
-                'V': zenith_angle if zenith_angle is not None else None,
-                'd': distance if distance is not None else None,
-                'X': x,
-                'Y': y,
-                'Z': z,
-                'angle_unit': angle_unit,
-                'd_unit': d_unit,
-                'coordinate_unit': coordinate_unit
-            }
+                # Store data in the dictionary
+                data_dict[PointID] = {
+                    'Hz': azimuth if data_format == 'spherical' else None,
+                    'V': zenith_angle if data_format == 'spherical' else None,
+                    'd': distance if data_format == 'spherical' else None,
+                    'X': x,
+                    'Y': y,
+                    'Z': z,
+                    'angle_unit': angle_unit if data_format == 'spherical' else None,
+                    'd_unit': d_unit if data_format == 'spherical' else None,
+                    'coordinate_unit': coordinate_unit,
 
-    return data_dict
+                }
+
+    return data_dict, file_path
+
+
+def get_angle_scale(output_units):
+    if output_units["angles"] == "gon":
+        return np.pi / 200.0  # Convert gon to radians
+    elif output_units["angles"] == "rad":
+        return 1.0
+    elif output_units["angles"] == "mrad":
+        return 0.001
+    elif output_units["angles"] == "deg":
+        return np.pi / 180.0  # Convert degrees to radians
+    else:
+        raise ValueError(f"Invalid angle unit '{output_units['angles']}' specified.")
 
 
 
-def fit_circle_3d(data_dict, output_units):
+def fit_circle_3d(data_tuple, output_units):
+    data_dict, file_path = data_tuple
     # Extract data from the dictionary
     x, y, z = [], [], []
 
@@ -216,29 +260,172 @@ def fit_circle_3d(data_dict, output_units):
 
     # Fit a circle in 3D using least squares optimization
     initial_guess = np.array([np.mean(x), np.mean(y), np.mean(z), np.mean(np.sqrt((x - np.mean(x))**2 + (y - np.mean(y))**2 + (z - np.mean(z))**2))])
-    result = least_squares(circle_residuals, initial_guess, args=(x, y, z))
+    result = least_squares(circle_residuals_3d, initial_guess, args=(x, y, z))
 
     # Check if the optimization succeeded
     if result.success:
         center_x, center_y, center_z, radius = result.x
     else:
-        print("No circle could be fit to the data.")
+        print("No circle could be fit to the data. Optimization process failed.")
         return None
 
     # Scale the output based on output_units from config.py
-    result_scale = 1.0
-
-    if output_units["distances"] == "m":
-        result_scale = 0.001
-    elif output_units["distances"] == "cm":
-        result_scale = 0.01
-    elif output_units["distances"] == "mm":
-        result_scale = 1.0
-    elif output_units["distances"] == "um":
-        result_scale = 1000.0
-   
+    result_scale = get_distance_scale(output_units)
+    
+    # Prepare statistics if requested
+    statistics = None
+    residuals = circle_residuals_3d(result.x, x, y, z)
+    statistics = {
+            "Standard Deviation": np.std(residuals),
+            "Maximum Residual": np.max(abs(residuals)),
+            "Minimum Residual": np.min(abs(residuals)),
+            "RMS": np.sqrt(np.mean(residuals**2)),
+            "Mean": np.mean(residuals),
+            "Median": np.median(residuals)
+        }
 
     # Scale the output
     center_x, center_y, center_z, radius = center_x * result_scale, center_y * result_scale, center_z * result_scale, radius * result_scale
 
-    return center_x, center_y, center_z, radius
+    return {"center_x": center_x, "center_y": center_y, "center_z": center_z, "radius": radius, "statistics": statistics}
+
+def fit_circle_2d(data_tuple, output_units, log_file_path=None):
+    data_dict, file_path = data_tuple
+    # Extract data from the dictionary
+    x, y = [], []
+
+    for point_data in data_dict.values():
+        # Parse data in Cartesian format
+        x.append(point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
+        y.append(point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
+
+    # Fit a circle in 2D using least squares optimization
+    initial_guess = np.array([np.mean(x), np.mean(y), np.mean(np.sqrt((x - np.mean(x))**2 + (y - np.mean(y))**2))])
+    result = least_squares(circle_residuals_2d, initial_guess, args=(x, y))
+
+    # Check if the optimization succeeded
+    if result.success:
+        center_x, center_y, radius = result.x
+    else:
+        print("No circle could be fit to the data.")
+        return None
+
+    # Scale the output based on output_units from config.py
+    result_scale = get_distance_scale(output_units)
+
+    # Scale the output
+    center_x, center_y, radius = center_x * result_scale, center_y * result_scale, radius * result_scale
+    
+    # Prepare statistics if requested
+    statistics = None
+    
+    residuals = circle_residuals_2d(result.x, x, y)
+    statistics = {
+            "Standard Deviation": np.std(residuals),
+            "Maximum |Residual|": np.max(abs(residuals)),
+            "Minimum |Residual|": np.min(abs(residuals)),
+            "RMS": np.sqrt(np.mean(residuals**2)),
+            "Mean": np.mean(residuals),
+            "Median": np.median(residuals)
+        }
+    if log_file_path:
+        write_circle_fit_log(log_file_path, file_path, data_dict, {"center_x": center_x, "center_y": center_y}, radius, output_units, statistics, log_statistics=False)
+
+    return {"center": (center_x, center_y), "radius": radius, "statistics": statistics}
+
+
+# Define the circle residuals function for 2D
+def circle_residuals_2d(params, x, y):
+    center_x, center_y, radius = params
+    return np.sqrt((x - center_x)**2 + (y - center_y)**2) - radius
+
+def get_distance_scale(output_units):
+    if output_units["distances"] == "m":
+        return 0.001
+    elif output_units["distances"] == "cm":
+        return 0.01
+    elif output_units["distances"] == "mm":
+        return 1.0
+    elif output_units["distances"] == "um":
+        return 1000.0
+    else:
+        raise ValueError(f"Invalid distance unit '{output_units['distances']}' specified.")
+
+def plane_residuals(coeffs, x, y, z):
+    a, b, c = coeffs
+    return a * np.array(x) + b * np.array(y) + c - np.array(z)
+
+def fit_plane_3d(data_tuple, output_units, log_statistics):
+    data_dict, file_path = data_tuple
+    # Check if 3D points are available
+    if not any('Z' in point_data for point_data in data_dict.values()):
+        raise ValueError("The input data are not in 3D, a plane cannot be fit through those points.")
+
+    # Extract 3D points from the dictionary
+    x, y, z = [], [], []
+
+    for point_data in data_dict.values():
+        if 'X' in point_data and 'Y' in point_data and 'Z' in point_data:
+            x.append(point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
+            y.append(point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
+            z.append(point_data['Z'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
+
+    if len(x) < 3:
+        raise ValueError("Insufficient 3D points available to fit a plane. At least three 3D points (X, Y, Z) are required for plane fitting.")
+
+    # Fit a plane using least squares optimization
+    initial_guess = np.array([1.0, 1.0, 1.0])
+    result = least_squares(plane_residuals, initial_guess, args=(x, y, z))
+
+    # Check if the optimization succeeded
+    if not result.success:
+        raise ValueError("Failed to fit a plane to the data. Please check the input data_dict and try again.")
+
+    # Scale the output based on output_units
+    result_scale = get_distance_scale(output_units)
+
+    # Scale the coefficients
+    a, b, c = result.x * result_scale
+    
+    # Calculate the plane offset D
+    d = -1.0 * np.mean(a * np.array(x) + b * np.array(y) + c * np.array(z))
+
+    return (a, b, c,d)
+"""
+# Example usage with data_dict and output_units as inputs
+try:
+    plane_coefficients = fit_plane_3d(data_dict, output_units)
+    print("Plane coefficients (a, b, c):", plane_coefficients)
+except ValueError as e:
+    print(str(e))
+"""
+
+
+def write_circle_fit_log(log_file_path, file_path, data_dict, center, radius, output_units, statistics, log_statistics=False):
+    if not log_file_path:
+        return
+    
+    with open(log_file_path, 'a+') as log_file:
+        circle_name = os.path.basename(file_path)
+        # Write header with date and time of calculation
+        log_file.write("Circle {} Fitting Results:\n".format(circle_name))
+        log_file.write("Calculation Date: {}\n".format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        log_file.write("Source File: {}\n".format(file_path))
+        log_file.write("Units: {}\n".format(output_units["distances"]))
+        log_file.write("\n")
+
+        # Write circle fitting results
+        if "center_z" in center:
+            log_file.write("Center: {},{},{}\n".format(center["center_x"],center["center_y"],center["center_z"]))
+        else:
+            log_file.write("Center: {},{}\n".format(center["center_x"],center["center_y"]))
+ 
+        log_file.write("Radius: {}\n".format(radius))
+        log_file.write("\n")
+
+        # Write statistics if available and log_statistics is True
+        if log_statistics:
+            log_file.write("Best-fit Statistics:\n")
+            for key, value in statistics.items():
+                log_file.write("{}: {}\n".format(key, value))
+            log_file.write("\n")
