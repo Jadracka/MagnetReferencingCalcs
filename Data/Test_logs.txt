@@ -62,3 +62,38 @@ Units: um
 Center: -18.54283270407029,-95.89789018692701
 Radius: 4.234783642174505
 
+__________________________________________________Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-03 09:59:35
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+__________________________________________________
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-03 10:00:09
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+______________________________________________________________________
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-03 10:00:20
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+
+____________________________________________________________________________________________________
+Circle Keyence_meas_python_input2d.txt Fitting Results:
+Calculation Date: 2023-08-03 10:00:29
+Source File: H:\My Documents\Coding\MagnetReferencingCalcs\Data\Keyence_meas_python_input2d.txt
+Units: um
+
+Center: -18.54283270407029,-95.89789018692701
+Radius: 4.234783642174505
+

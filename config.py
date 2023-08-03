@@ -22,6 +22,8 @@ import os
 log_fitted_objects = True
 log_statistics = True
 
+maximum_planar_offset = 1e-6
+
 # Output units for circle parameters
 output_units = {
     "distances": "um",  # Choose from ["m", "cm", "mm", "um"]
@@ -48,13 +50,15 @@ keyence1 = "Keyence_meas_python_input.txt"
 keyence2 = "Keyence_meas_python_input2d.txt"
 LT = "LT_meas_python_input.txt"
 planeANDcircle_test_points = "points_to_fit.txt"
+test_plane1 = "Plane_test_1.txt"
 
 # Create the full file path by joining the current directory and the subfolder name
-logfile_path = os.path.join(current_dir, data_folder, log_filename)
+logfile_path = os.path.join(current_dir, log_folder, log_filename)
 circle_file = os.path.join(current_dir, data_folder, data_file)
 keyence_path = os.path.join(current_dir, data_folder, keyence1)
 keyence2d_path = os.path.join(current_dir, data_folder, keyence2)
 LT_path = os.path.join(current_dir, data_folder, LT)
+test_plane1_path = os.path.join(current_dir, data_folder, "Plane_test_1.txt")
 
 planeANDcircle_test_points_path = os.path.join(current_dir, data_folder, planeANDcircle_test_points)
 
