@@ -20,3 +20,4 @@ test_plane1 = fc.fit_plane(fc.read_data_from_file(cg.test_plane1_path), cg.outpu
 #testing_circle_coefficients = fc.fit_circle_3d(fc.read_data_from_file(cg.planeANDcircle_test_points_path), cg.output_units_LT)
 TwoD_points = fc.rotate_to_xy_plane(data_dict, testing_plane_coefficients)
 fc.plot_points_rotated_2d(TwoD_points)
+fc.compare_distances(TwoD_points, data_dict, 1e-3, 200)

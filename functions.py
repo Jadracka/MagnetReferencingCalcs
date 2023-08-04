@@ -11,6 +11,8 @@ import datetime
 import inspect
 import os
 import matplotlib.pyplot as plt
+import random
+from itertools import product, combinations
 
 def gon_to_radians(gon):
     return gon * (2 * np.pi / 400)
@@ -602,6 +604,10 @@ def rotate_to_xy_plane(points_dict, plane_params):
 
     return points_projected
 
+
+def point_distance_3D(x1, y1, z1, x2, y2, z2):
+    return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
 def rotation_matrix_from_vectors(v1, v2):
     """
     Compute the rotation matrix that aligns vector v1 with vector v2 using the Rodrigues' rotation formula.
@@ -663,3 +669,53 @@ def plot_points_rotated_2d(points_rotated):
 
     # Show the plot
     plt.show()
+
+def point_distance(point_data1, point_data2):
+    x1, y1, z1 = point_data1['X'], point_data1['Y'], point_data1.get('Z')
+    x2, y2, z2 = point_data2['X'], point_data2['Y'], point_data2.get('Z')
+
+    if z1 is None or z2 is None:
+        return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    else:
+        return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+
+def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
+    point_names_dict1 = set(dict1.keys())
+    point_names_dict2 = set(dict2.keys())
+
+    common_point_names = point_names_dict1.intersection(point_names_dict2)
+
+    if num_pairs == 'all':
+        point_pairs = list(combinations(common_point_names, 2))
+    else:
+        num_pairs = min(num_pairs, len(common_point_names) * (len(common_point_names) - 1) // 2)
+        point_pairs = random.sample(list(combinations(common_point_names, 2)), num_pairs)
+
+    total_possible_pairs = len(common_point_names) * (len(common_point_names) - 1) // 2
+    total_pairs_tested = len(point_pairs)
+    out_of_spec_pairs = 0
+    discrepancies = {}
+
+    for point_name1, point_name2 in point_pairs:
+        distance_dict1 = point_distance(dict1[point_name1], dict1[point_name2])
+        distance_dict2 = point_distance(dict2[point_name1], dict2[point_name2])
+
+        discrepancy = abs(distance_dict1 - distance_dict2)
+
+        if discrepancy > tolerance:
+            sorted_pair = tuple(sorted([point_name1, point_name2]))
+            discrepancies[sorted_pair] = discrepancy
+            
+    out_of_spec_pairs = len(discrepancies)
+
+    print(f"Testing {total_pairs_tested} point pairs out of {total_possible_pairs} possible pairs.")
+    print(f"Found {out_of_spec_pairs} pairs out of spec.")
+
+    if len(discrepancies) == 0:
+        print("All tested point pairs are within the tolerance.")
+        return True
+    else:
+        for (point_name1, point_name2), discrepancy in discrepancies.items():
+            print(f"Point pair '{point_name1}' and '{point_name2}' has a discrepancy of {discrepancy:.4f}{dict2[point_name1]['coordinate_unit']}.")
+        
+        return False
