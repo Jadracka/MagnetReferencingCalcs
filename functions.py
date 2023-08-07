@@ -12,51 +12,157 @@ import inspect
 import os
 import matplotlib.pyplot as plt
 import random
-from itertools import product, combinations
+from itertools import combinations
+from mpl_toolkits.mplot3d import Axes3D
+
 
 def gon_to_radians(gon):
+    """
+    Convert an angle in gradians (gons) to radians.
+
+    Gradians (gons) are a unit of angular measurement where a full circle is divided into 400 gradians.
+    This function takes an angle in gradians and returns its equivalent angle in radians.
+
+    Parameters:
+    gon (float): Angle in gradians (gons) to be converted to radians.
+
+    Returns:
+    float: Angle in radians equivalent to the input angle in gradians.
+
+    Examples:
+    >>> gon_to_radians(200)
+    3.141592653589793
+    >>> gon_to_radians(100)
+    1.5707963267948966
+    """
     return gon * (2 * np.pi / 400)
 
 def degrees_to_radians(degrees):
+    """
+    Convert an angle in degrees to radians.
+
+    Degrees are a unit of angular measurement where a full circle is divided into 360 degrees.
+    This function takes an angle in degrees and returns its equivalent angle in radians.
+
+    Parameters:
+    degrees (float): Angle in degrees to be converted to radians.
+
+    Returns:
+    float: Angle in radians equivalent to the input angle in degrees.
+
+    Examples:
+    >>> degrees_to_radians(180)
+    3.141592653589793
+    >>> degrees_to_radians(90)
+    1.5707963267948966
+    """
     return degrees * (np.pi / 180.0)
 
 def cartesian_to_spherical(x, y, z):
+    """
+    Convert Cartesian coordinates to spherical coordinates.
+
+    Converts the given Cartesian coordinates (x, y, z) to spherical coordinates (r, theta, phi).
+    r represents the radial distance from the origin to the point.
+    theta represents the inclination angle measured from the positive z-axis.
+    phi represents the azimuthal angle measured from the positive x-axis.
+
+    Parameters:
+    x (float): x-coordinate in Cartesian space.
+    y (float): y-coordinate in Cartesian space.
+    z (float): z-coordinate in Cartesian space.
+
+    Returns:
+    tuple: A tuple containing (r, theta, phi) in spherical coordinates.
+
+    Examples:
+    >>> cartesian_to_spherical(1, 1, 1)
+    (1.7320508075688772, 0.9553166181245093, 0.7853981633974483)
+    >>> cartesian_to_spherical(0, 0, 2)
+    (2.0, 1.5707963267948966, 0.0)
+    """
     r = np.sqrt(x**2 + y**2 + z**2)
     theta = np.arccos(z / r)
     phi = np.arctan2(y, x)
     return r, theta, phi
 
-def spherical_to_cartesian(r, theta, phi):
-    x = r * np.sin(theta) * np.cos(phi)
-    y = r * np.sin(theta) * np.sin(phi)
-    z = r * np.cos(theta)
-    return x, y, z
+def spherical_to_cartesian(d, Hz, V):
+    """
+    Convert spherical coordinates to 3D Cartesian coordinates in terms of distance, horizontal angle, and zenithal angle.
 
-def spherical_to_cartesian_unit(distance, angle_unit, azimuth, zenith_angle, d_unit):
+    Converts the given spherical coordinates (d, Hz, V) to 3D Cartesian coordinates (X, Y, Z).
+    d represents the radial distance from the origin to the point.
+    Hz represents the horizontal angle measured from the positive x-axis.
+    V represents the zenithal angle measured from the positive z-axis.
+
+    Parameters:
+    d (float): Radial distance in spherical coordinates.
+    Hz (float): Horizontal angle in radians.
+    V (float): Zenithal angle in radians.
+
+    Returns:
+    tuple: A tuple containing (X, Y, Z) in 3D Cartesian coordinates.
+
+    Examples:
+    >>> spherical_to_cartesian(1.0, 0.7853981633974483, 0.7853981633974483)
+    (0.5000000000000001, 0.5000000000000001, 0.49999999999999994)
+    >>> spherical_to_cartesian(2.0, 1.5707963267948966, 0.0)
+    (1.2246467991473532e-16, 2.0, 0.0)
+    """
+    X = d * np.cos(-Hz) * np.sin(V)
+    Y = d * np.sin(-Hz) * np.sin(V)
+    Z = d * np.cos(V)
+    return X, Y, Z
+
+def spherical_to_cartesian_unit(d, d_unit, angle_unit, Hz, V):
+    """
+    Convert spherical coordinates to Cartesian coordinates with specified units.
+
+    Converts the given spherical coordinates (d, Hz, V) to 3D Cartesian coordinates (x, y, z) in the specified units.
+
+    Parameters:
+    d (float): Radial distance in spherical coordinates.
+    angle_unit (str): Unit of the angles. Choose from 'rad', 'gon', or 'deg'.
+    Hz (float): Horizontal angle.
+    V (float): Zenithal angle.
+    d_unit (str): Unit of the radial distance. Choose from 'um', 'mm', 'cm', or 'm'.
+
+    Returns:
+    tuple: A tuple containing (x, y, z) Cartesian coordinates in the specified units.
+
+    Raises:
+    ValueError: If an invalid angle unit or radial distance unit is specified.
+
+    Examples:
+    >>> spherical_to_cartesian_unit(1.0, 'rad', 0.7853981633974483, 0.7853981633974483, 'mm')
+    (0.5000000000000001, 0.5000000000000001, 0.49999999999999994)
+    >>> spherical_to_cartesian_unit(2.0, 'deg', 90, 0.0, 'cm')
+    (1.2246467991473532e-16, 200.0, 0.0, 'mm')
+    """
     # Convert the angle to radians if needed
-    if angle_unit == 'gons':
-        azimuth = gon_to_radians(azimuth)
-        zenith_angle = gon_to_radians(zenith_angle)
-    elif angle_unit == 'degrees':
-        azimuth = degrees_to_radians(azimuth)
-        zenith_angle = degrees_to_radians(zenith_angle)
+    if angle_unit == 'gon':
+        Hz = gon_to_radians(Hz)
+        V = gon_to_radians(V)
+    elif angle_unit == 'deg':
+        Hz = degrees_to_radians(Hz)
+        V = degrees_to_radians(V)
 
-    # Convert distance to millimeters
+    # Convert d to millimeters
     if d_unit == 'um':
-        distance *= 0.001
+        d *= 0.001
     elif d_unit == 'mm':
-        distance *= 1.0
+        d *= 1.0
     elif d_unit == 'cm':
-        distance *= 10.0
+        d *= 10.0
     elif d_unit == 'm':
-        distance *= 1000.0
+        d *= 1000.0
     else:
-        raise ValueError("Invalid distance unit specified.")
+        raise ValueError("Invalid d unit specified.")
 
     # Calculate Cartesian coordinates in millimeters
-    x = distance * np.sin(zenith_angle) * np.cos(azimuth)
-    y = distance * np.sin(zenith_angle) * np.sin(azimuth)
-    z = distance * np.cos(zenith_angle)
+    x = d * np.sin(V) * np.cos(-Hz)
+    y = d * np.sin(V) * np.sin(-Hz)
+    z = d * np.cos(V)
 
     return x, y, z, 'mm'
 
@@ -83,11 +189,11 @@ def get_variable_name(variable):
         age = 30
 
     variable_name_as_string = get_variable_name(name)
-    print(variable_name_as_string) 
+    print(variable_name_as_string)
     prints 'name' """
     # Get the calling frame
     frame = inspect.currentframe().f_back
-    
+
     # Find the variable name by checking the locals and globals dictionaries
     for name, value in frame.f_locals.items():
         if value is variable:
@@ -119,14 +225,14 @@ def generate_noisy_ellipse_points(a, b, center_x, center_y, num_points, std_dev)
 
     x += noise_x
     y += noise_y
-    
+
     """
     print("True Parameters:")
     print("Semi-Major Axis (a):", a)
     print("Semi-Minor Axis (b):", b)
     print("Center (x, y):", center_x, center_y)
     """
-    
+
     return x, y
 
 def generate_ellipse_points(center, semi_major_axis, semi_minor_axis, num_points):
@@ -136,7 +242,7 @@ def generate_ellipse_points(center, semi_major_axis, semi_minor_axis, num_points
     Semi_major_axis = 5  # Length of the semi-major axis
     Semi_minor_axis = 3  # Length of the semi-minor axis
     Num_points = 100  # Number of points to generate on the ellipse
-    
+
     x_points, y_points = generate_ellipse_points(Center, Semi_major_axis, Semi_minor_axis, Num_points)
     """
     angles = np.linspace(0, 2 * np.pi, num_points)
@@ -159,7 +265,7 @@ def get_unit_multiplier(unit):
         return 0.001
     else:
         raise ValueError("Invalid unit specified in the header.")
-        
+
 def read_data_from_file(file_path):
     data_dict = {}
 
@@ -208,7 +314,7 @@ def read_data_from_file(file_path):
                     distance = float(line[3].replace(',', '.'))
 
                     # Convert spherical to Cartesian
-                    x, y, z, coordinate_unit = spherical_to_cartesian_unit(distance, angle_unit, azimuth, zenith_angle, d_unit)
+                    x, y, z, coordinate_unit = spherical_to_cartesian_unit(distance, d_unit, angle_unit, azimuth, zenith_angle)
 
                 elif data_format == 'cartesian' or data_format == 'cartesian2d':
                     x = float(line[1].replace(',', '.'))
@@ -233,7 +339,6 @@ def read_data_from_file(file_path):
                 }
 
     return data_dict, file_path
-
 
 def get_angle_scale(output_units):
     if output_units["angles"] == "gon":
@@ -269,11 +374,11 @@ def fit_circle_3d_not_general_enough(data_tuple, output_units):
         center_x, center_y, center_z, radius = result.x
     else:
         print("No circle could be fit to the data. Optimization process failed.")
-        return None
+        return data_dict
 
     # Scale the output based on output_units from config.py
     result_scale = get_distance_scale(output_units)
-    
+
     # Prepare statistics if requested
     statistics = None
     residuals = circle_residuals_3d(result.x, x, y, z)
@@ -289,17 +394,23 @@ def fit_circle_3d_not_general_enough(data_tuple, output_units):
     # Scale the output
     center_x, center_y, center_z, radius = center_x * result_scale, center_y * result_scale, center_z * result_scale, radius * result_scale
 
-    return {"center_x": center_x, "center_y": center_y, "center_z": center_z, "radius": radius, "statistics": statistics}
+    return data_dict,{"center_x": center_x, "center_y": center_y, "center_z": center_z, "radius": radius, "statistics": statistics}
 
 def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     data_dict, file_path = data_tuple
     # Extract data from the dictionary
     x, y = [], []
 
-    for point_data in data_dict.values():
+    # Create a list to store point names
+    point_names = []
+
+    for point_name, point_data in data_dict.items():
         # Parse data in Cartesian format
         x.append(point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
         y.append(point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
+
+        # Store the point name
+        point_names.append(point_name)
 
     # Fit a circle in 2D using least squares optimization
     initial_guess = np.array([np.mean(x), np.mean(y), np.mean(np.sqrt((x - np.mean(x))**2 + (y - np.mean(y))**2))])
@@ -317,26 +428,29 @@ def fit_circle_2d(data_tuple, output_units, log_file_path=None):
 
     # Scale the output
     center_x, center_y, radius = center_x * result_scale, center_y * result_scale, radius * result_scale
-    
+
+    # Calculate radial offsets
+    radial_offsets = np.sqrt((x - center_x)**2 + (y - center_y)**2) - radius
+
+    # Create a dictionary to store radial offsets for each point
+    point_radial_offsets = {point_name: offset for point_name, offset in zip(point_names, radial_offsets)}
+
     # Prepare statistics if requested
-    statistics = None
-    
-    residuals = circle_residuals_2d(result.x, x, y)
     statistics = {
-            "Standard Deviation": np.std(residuals),
-            "Maximum |Residual|": np.max(abs(residuals)),
-            "Minimum |Residual|": np.min(abs(residuals)),
-            "RMS": np.sqrt(np.mean(residuals**2)),
-            "Mean": np.mean(residuals),
-            "Median": np.median(residuals)
-        }
+        "Standard Deviation": np.std(radial_offsets),
+        "Maximum |Residual|": np.max(abs(radial_offsets)),
+        "Minimum |Residual|": np.min(abs(radial_offsets)),
+        "RMS": np.sqrt(np.mean(radial_offsets**2)),
+        "Mean": np.mean(radial_offsets),
+        "Median": np.median(radial_offsets),
+        "Maximum |Radial Offset|": np.max(radial_offsets)
+    }
+
     if log_file_path:
         write_circle_fit_log(log_file_path, file_path, data_dict, {"center_x": center_x, "center_y": center_y}, radius, output_units, statistics, log_statistics=False)
 
-    return {"center": (center_x, center_y), "radius": radius, "statistics": statistics}
+    return {"center": (center_x, center_y), "radius": radius, "statistics": statistics, "point_radial_offsets": point_radial_offsets}
 
-
-# Define the circle residuals function for 2D
 def circle_residuals_2d(params, x, y):
     center_x, center_y, radius = params
     return np.sqrt((x - center_x)**2 + (y - center_y)**2) - radius
@@ -358,15 +472,6 @@ def plane_residuals(coeffs, A, z):
     predicted_z = np.dot(A, np.array([a, b, c])) + d
     residuals = predicted_z - z
     return residuals
-
-"""
-# Example usage with data_dict and output_units as inputs
-try:
-    plane_coefficients = fit_plane_3d(data_dict, output_units)
-    print("Plane coefficients (a, b, c):", plane_coefficients)
-except ValueError as e:
-    print(str(e))
-"""
 
 def fit_plane(data_tuple, output_units, log_statistics):
     data_dict, file_path = data_tuple
@@ -434,7 +539,7 @@ def get_plane_angles(normal_vector, output_units):
 def write_circle_fit_log(log_file_path, file_path, data_dict, center, radius, output_units, statistics, log_statistics=False):
     if not log_file_path:
         return
-    
+
     with open(log_file_path, 'a+') as log_file:
         circle_name = os.path.basename(file_path)
         # Write header with date and time of calculation
@@ -450,7 +555,7 @@ def write_circle_fit_log(log_file_path, file_path, data_dict, center, radius, ou
             log_file.write("Center: {},{},{}\n".format(center["center_x"],center["center_y"],center["center_z"]))
         else:
             log_file.write("Center: {},{}\n".format(center["center_x"],center["center_y"]))
- 
+
         log_file.write("Radius: {}\n".format(radius))
         log_file.write("\n")
 
@@ -525,13 +630,13 @@ def project_points_onto_plane(points_dict, plane_params):
     """
     a, b, c, d = plane_params
     points_projected = {}
-    
+
     for point_name, point_data in points_dict.items():
         x = point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
         y = point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
         z = point_data['Z'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
-        
-        
+
+
         # Project the point onto the plane
         distance = point_to_plane_distance(x, y, z, plane_params)
         x_proj = x - distance * a
@@ -585,25 +690,23 @@ def rotate_to_xy_plane(points_dict, plane_params):
         x = point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
         y = point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
         z = point_data['Z'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
-        
+
         distance = point_to_plane_distance(x, y, z, plane_params)
-        x_proj = x - distance * a
-        y_proj = y - distance * b
-        z_proj = z - distance * c
+        x_trans = x - distance * a
+        y_trans = y - distance * b
+        z_trans = z - distance * c
 
         # Rotate the projected point
-        point_rotated = np.dot(R, np.array([x_proj, y_proj, z_proj]))
+        points_transformed = np.dot(R, np.array([x_proj, y_proj, z_proj]))
 
         # Convert back to original units and store in the points_projected dictionary
-        points_projected[point_name] = {
-            'X': point_rotated[0],
-            'Y': point_rotated[1],
-            'Z': point_rotated[2],
-            'planar_offset': distance
+        points_transformed[point_name] = {
+            'X': point_transformed[0],
+            'Y': point_transformed[1],
+            'Z': point_transformed[2],
         }
 
-    return points_projected
-
+    return points_transformed, R
 
 def point_distance_3D(x1, y1, z1, x2, y2, z2):
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
@@ -623,21 +726,20 @@ def rotation_matrix_from_vectors(v1, v2):
     v2 = v2 / np.linalg.norm(v2)
     axis = np.cross(v1, v2)
     angle = np.arccos(np.dot(v1, v2))
-    
+
     if np.allclose(axis, 0):
         # Handle special case when vectors are parallel
         return np.eye(3)
-    
+
     kx, ky, kz = axis
     K = np.array([
         [0, -kz, ky],
         [kz, 0, -kx],
         [-ky, kx, 0]
     ])
-    
+
     R = np.eye(3) + np.sin(angle) * K + (1 - np.cos(angle)) * np.dot(K, K)
     return R
-
 
 def plot_points_rotated_2d(points_rotated):
     """
@@ -680,6 +782,7 @@ def point_distance(point_data1, point_data2):
         return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 
 def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
+    '''It does all if the argument is not there!'''
     point_names_dict1 = set(dict1.keys())
     point_names_dict2 = set(dict2.keys())
 
@@ -705,11 +808,12 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
         if discrepancy > tolerance:
             sorted_pair = tuple(sorted([point_name1, point_name2]))
             discrepancies[sorted_pair] = discrepancy
-            
+
     out_of_spec_pairs = len(discrepancies)
 
     print(f"Testing {total_pairs_tested} point pairs out of {total_possible_pairs} possible pairs.")
     print(f"Found {out_of_spec_pairs} pairs out of spec.")
+    print(f"Maximum discrepancy is {max(discrepancies.values())},\nminimum discrepancy is {max(discrepancies.values())}.")
 
     if len(discrepancies) == 0:
         print("All tested point pairs are within the tolerance.")
@@ -717,5 +821,47 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
     else:
         for (point_name1, point_name2), discrepancy in discrepancies.items():
             print(f"Point pair '{point_name1}' and '{point_name2}' has a discrepancy of {discrepancy:.4f}{dict2[point_name1]['coordinate_unit']}.")
-        
+
         return False
+
+def plot_cartesian_3d(points_dict):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    for point_name, point_info in points_dict.items():
+        x = point_info['X']
+        y = point_info['Y']
+        z = point_info['Z']
+
+        ax.scatter(x, y, z)
+        ax.text(x, y, z, point_name, fontsize=10, ha='right')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    plt.show(block=True)  # Use block=True to open in separate window
+
+def plot_spherical_3d(points_dict):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    for point_name, point_info in points_dict.items():
+        r = point_info['d']
+        theta = np.radians(point_info['Hz'])
+        phi = np.radians(point_info['V'])
+
+        x = r * np.sin(phi) * np.cos(theta)
+        y = r * np.sin(phi) * np.sin(theta)
+        z = r * np.cos(phi)
+
+        ax.scatter(x, y, z)
+        ax.text(x, y, z, point_name, fontsize=10, ha='right')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    plt.show(block=True)  # Use block=True to open in separate window
+
+def
