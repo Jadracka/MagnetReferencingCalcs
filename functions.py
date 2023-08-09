@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import random
 from itertools import combinations
 from mpl_toolkits.mplot3d import Axes3D
+from typing import Union
 
 
 def gon_to_radians(gon):
@@ -178,10 +179,6 @@ def coordinate_unit_to_mm(unit):
         return 1000.0
     else:
         raise ValueError("Invalid coordinate unit specified.")
-
-def circle_residuals_3d(params, x, y, z):
-    cx, cy, cz, r = params
-    return (x - cx)**2 + (y - cy)**2 + (z - cz)**2 - r**2
 
 def get_variable_name(variable):
     """# Example usage:
@@ -352,52 +349,23 @@ def get_angle_scale(output_units):
     else:
         raise ValueError(f"Invalid angle unit '{output_units['angles']}' specified.")
 
-def fit_circle_3d_not_general_enough(data_tuple, output_units):
-    data_dict, file_path = data_tuple
-    # Extract data from the dictionary
-    x, y, z = [], [], []
-
-    for point_data in data_dict.values():
-        # Parse data in Cartesian format
-        x.append(point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
-        y.append(point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
-        z.append(point_data['Z'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
-
-
-
-    # Fit a circle in 3D using least squares optimization
-    initial_guess = np.array([np.mean(x), np.mean(y), np.mean(z), np.mean(np.sqrt((x - np.mean(x))**2 + (y - np.mean(y))**2 + (z - np.mean(z))**2))])
-    result = least_squares(circle_residuals_3d, initial_guess, args=(x, y, z))
-
-    # Check if the optimization succeeded
-    if result.success:
-        center_x, center_y, center_z, radius = result.x
-    else:
-        print("No circle could be fit to the data. Optimization process failed.")
-        return data_dict
-
-    # Scale the output based on output_units from config.py
-    result_scale = get_distance_scale(output_units)
-
-    # Prepare statistics if requested
-    statistics = None
-    residuals = circle_residuals_3d(result.x, x, y, z)
+def make_residual_stats(residuals: Union[np.ndarray,list,tuple]):
+    if not isinstance(residuals, np.ndarray):
+        residuals = np.array(residuals)
+        
     statistics = {
-            "Standard Deviation": np.std(residuals),
-            "Maximum Residual": np.max(abs(residuals)),
-            "Minimum Residual": np.min(abs(residuals)),
-            "RMS": np.sqrt(np.mean(residuals**2)),
-            "Mean": np.mean(residuals),
-            "Median": np.median(residuals)
-        }
-
-    # Scale the output
-    center_x, center_y, center_z, radius = center_x * result_scale, center_y * result_scale, center_z * result_scale, radius * result_scale
-
-    return data_dict,{"center_x": center_x, "center_y": center_y, "center_z": center_z, "radius": radius, "statistics": statistics}
+        "Standard Deviation": np.std(residuals),
+        "Maximum |Residual|": np.max(abs(residuals)),
+        "Minimum |Residual|": np.min(abs(residuals)),
+        "RMS": np.sqrt(np.mean(residuals**2)),
+        "Mean": np.mean(residuals),
+        "Median": np.median(residuals)
+    }
+    return statistics
 
 def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     data_dict, file_path = data_tuple
+    circle_name = os.path.splitext(os.path.basename(file_path))[0]
     # Extract data from the dictionary
     x, y = [], []
 
@@ -420,7 +388,7 @@ def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     if result.success:
         center_x, center_y, radius = result.x
     else:
-        print("No circle could be fit to the data.")
+        print("No circle  could be fit to the data.")
         return None
 
     # Scale the output based on output_units from config.py
@@ -436,20 +404,12 @@ def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     point_radial_offsets = {point_name: offset for point_name, offset in zip(point_names, radial_offsets)}
 
     # Prepare statistics if requested
-    statistics = {
-        "Standard Deviation": np.std(radial_offsets),
-        "Maximum |Residual|": np.max(abs(radial_offsets)),
-        "Minimum |Residual|": np.min(abs(radial_offsets)),
-        "RMS": np.sqrt(np.mean(radial_offsets**2)),
-        "Mean": np.mean(radial_offsets),
-        "Median": np.median(radial_offsets),
-        "Maximum |Radial Offset|": np.max(radial_offsets)
-    }
+    statistics = make_residual_stats(radial_offsets)
 
     if log_file_path:
         write_circle_fit_log(log_file_path, file_path, data_dict, {"center_x": center_x, "center_y": center_y}, radius, output_units, statistics, log_statistics=False)
 
-    return {"center": (center_x, center_y), "radius": radius, "statistics": statistics, "point_radial_offsets": point_radial_offsets}
+    return {"name": circle_name, "center": (center_x, center_y), "radius": radius, "statistics": statistics, "point_radial_offsets": point_radial_offsets}
 
 def circle_residuals_2d(params, x, y):
     center_x, center_y, radius = params
@@ -465,19 +425,18 @@ def get_distance_scale(output_units):
     elif output_units["distances"] == "um":
         return 1000.0
     else:
-        raise ValueError(f"Invalid distance unit '{output_units['distances']}' specified.")
+        raise ValueError(f"Invalid distance unit '{output_units['distances']}'" 
+                         f" specified.")
 
-def plane_residuals(coeffs, A, z):
-    a, b, c, d = coeffs
-    predicted_z = np.dot(A, np.array([a, b, c])) + d
-    residuals = predicted_z - z
-    return residuals
 
-def fit_plane(data_tuple, output_units, log_statistics):
+def fit_plane(data_tuple, output_units, log_statistics='False'):
     data_dict, file_path = data_tuple
+    plane_name = os.path.splitext(os.path.basename(file_path))[0]
+
     # Check if 3D points are available
     if not any('Z' in point_data for point_data in data_dict.values()):
-        raise ValueError("The input data are not in 3D, a plane cannot be fit through those points.")
+        raise ValueError(f"The input data are not in 3D, a {plane_name} plane "
+                         f"cannot be fit through those points.")
 
     # Extract 3D points from the dictionary
     x, y, z = [], [], []
@@ -489,7 +448,9 @@ def fit_plane(data_tuple, output_units, log_statistics):
             z.append(point_data['Z'] * coordinate_unit_to_mm(point_data['coordinate_unit']))
 
     if len(x) < 3:
-        raise ValueError("Insufficient 3D points available to fit a plane. At least three 3D points (X, Y, Z) are required for plane fitting.")
+        raise ValueError(f"Insufficient 3D points available to fit a plane in "
+                         f"{plane_name}. At least three 3D points (X, Y, Z) "
+                         f"are required for plane fitting.")
 
     # Calculate the centroid of the points
     centroid_x, centroid_y, centroid_z = np.mean(x), np.mean(y), np.mean(z)
@@ -521,8 +482,19 @@ def fit_plane(data_tuple, output_units, log_statistics):
     # Scale the coefficients and angles
 #    a, b, c = a * result_scale, b * result_scale, c * result_scale
 #    angles = [angle * angle_scale for angle in angles]
+    
+    
+    # Calculate residuals 
+    plane_params = (a, b, c, d)
+    residual_dict = {point_name: point_to_plane_distance(X, Y, Z, plane_params)
+                     for point_name, X, Y, Z in zip(list(data_dict.keys()), x, y, z) 
+                     }
 
-    return (a, b, c, d)#, angles)
+    # Prepare statistics if requested
+    statistics = make_residual_stats(np.array(list(residual_dict.values())))
+    
+    return plane_params, {'planer_offsets': residual_dict, 
+                          'plane_statistics': statistics}
 
 def get_plane_angles(normal_vector, output_units):
     normal_vector = normal_vector / np.linalg.norm(normal_vector)
@@ -636,19 +608,19 @@ def project_points_onto_plane(points_dict, plane_params):
         y = point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
         z = point_data['Z'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
 
-
         # Project the point onto the plane
         distance = point_to_plane_distance(x, y, z, plane_params)
         x_proj = x - distance * a
         y_proj = y - distance * b
         z_proj = z - distance * c
-
+        
         # Convert back to original units and store in the points_projected dictionary
         points_projected[point_name] = {
-            'X': x_proj / coordinate_unit_to_mm(point_data['coordinate_unit']),
-            'Y': y_proj / coordinate_unit_to_mm(point_data['coordinate_unit']),
-            'Z': z_proj / coordinate_unit_to_mm(point_data['coordinate_unit']),
-            'planar_offset': distance / coordinate_unit_to_mm(point_data['coordinate_unit'])
+            'X': x_proj,
+            'Y': y_proj,
+            'Z': z_proj,
+            'coordinate_unit': 'mm'
+#            'planar_offset': distance / coordinate_unit_to_mm(point_data['coordinate_unit'])
         }
 
     return points_projected
@@ -685,7 +657,7 @@ def rotate_to_xy_plane(points_dict, plane_params):
     R = rotation_matrix_from_vectors(normal_vector, v)
 
     # Project the points onto the plane
-    points_projected = {}
+    points_transformed = {}
     for point_name, point_data in points_dict.items():
         x = point_data['X'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
         y = point_data['Y'] * coordinate_unit_to_mm(point_data['coordinate_unit'])
@@ -697,16 +669,34 @@ def rotate_to_xy_plane(points_dict, plane_params):
         z_trans = z - distance * c
 
         # Rotate the projected point
-        points_transformed = np.dot(R, np.array([x_proj, y_proj, z_proj]))
+        point_transformed = np.dot(R, np.array([x_trans, y_trans, z_trans]))
 
-        # Convert back to original units and store in the points_projected dictionary
+        # Convert back to original units and store in the points_transformed dictionary
         points_transformed[point_name] = {
             'X': point_transformed[0],
             'Y': point_transformed[1],
             'Z': point_transformed[2],
+            'coordinate_unit': 'mm'
         }
 
     return points_transformed, R
+
+def reverse_from_XYplane_to_original(point_rotated, plane_params,R):
+    a, b, c, d = plane_params
+    
+
+    # Convert 2D coordinates back to 3D
+    X, Y, Z = point_rotated[0], point_rotated[1], d
+
+    print(plane_params)
+    print(X,Y,Z)
+    # Use the inverse of the rotation matrix to transform point back to the original 3D coordinate system
+    R_inv = np.linalg.inv(R)
+    point_original = np.dot(np.array([X, Y, Z]), R_inv)
+
+    print(point_original)
+
+    return point_original
 
 def point_distance_3D(x1, y1, z1, x2, y2, z2):
     return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
@@ -803,6 +793,13 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
         distance_dict1 = point_distance(dict1[point_name1], dict1[point_name2])
         distance_dict2 = point_distance(dict2[point_name1], dict2[point_name2])
 
+        # Convert to millimeters based on unit specs or assume mm if not provided
+        unit_dict1 = dict1[point_name1].get('coordinate_unit', 'mm')
+        unit_dict2 = dict2[point_name1].get('coordinate_unit', 'mm')
+
+        distance_dict1 *= coordinate_unit_to_mm(unit_dict1)
+        distance_dict2 *= coordinate_unit_to_mm(unit_dict2)
+
         discrepancy = abs(distance_dict1 - distance_dict2)
 
         if discrepancy > tolerance:
@@ -811,18 +808,18 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
 
     out_of_spec_pairs = len(discrepancies)
 
-    print(f"Testing {total_pairs_tested} point pairs out of {total_possible_pairs} possible pairs.")
-    print(f"Found {out_of_spec_pairs} pairs out of spec.")
-    print(f"Maximum discrepancy is {max(discrepancies.values())},\nminimum discrepancy is {max(discrepancies.values())}.")
+#    print(f"Testing {total_pairs_tested} point pairs out of {total_possible_pairs} possible pairs.")
+#    print(f"Found {out_of_spec_pairs} pairs out of spec.")
 
     if len(discrepancies) == 0:
-        print("All tested point pairs are within the tolerance.")
+#        print("All tested point pairs are within the tolerance.")
         return True
     else:
+        print(f"Maximum discrepancy is {max(discrepancies.values())},\nminimum discrepancy is {max(discrepancies.values())}.")
         for (point_name1, point_name2), discrepancy in discrepancies.items():
             print(f"Point pair '{point_name1}' and '{point_name2}' has a discrepancy of {discrepancy:.4f}{dict2[point_name1]['coordinate_unit']}.")
 
-        return False
+        return discrepancies
 
 def plot_cartesian_3d(points_dict):
     fig = plt.figure()
@@ -864,4 +861,48 @@ def plot_spherical_3d(points_dict):
 
     plt.show(block=True)  # Use block=True to open in separate window
 
-def
+def merge_circle_offsets(dict1, dict2):
+    merged_dict = {}
+    
+    for point_name in dict1.keys():
+        if point_name in dict2:
+            merged_dict[point_name] = {
+                'planar_offset': dict1[point_name],
+                'radial_offset': dict2[point_name]
+            }
+    
+    return merged_dict
+
+def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance, log_statistics = False, print_statistics = False):
+    data_dict, file_path = data_tuple
+    circle_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    #see readin function's docstring.
+    plane_params, plane_statistics_dict =  fit_plane(data_tuple, output_unit, log_statistics) #(a, b, c, d)#, angles)
+    
+    points_projected = project_points_onto_plane(data_dict, plane_params)
+    points_transformed, Rot_matrix = rotate_to_xy_plane(points_projected, plane_params)
+    if not compare_distances(data_dict, points_transformed, point_transform_check_tolerance):
+        print(f"During the {circle_name} circle fitting process, there has "
+              f"been a difference in point-to-point distances between pre-"
+              f" and post-transformation of tested pairs that exceeded "
+              f"{point_transform_check_tolerance}mm .\nPlease review"
+              f" the detailed statistics and take appropriate "
+              f"actions. The fit has been performed anyway")
+    circle_params_2d = fit_circle_2d((points_transformed,file_path), output_unit)
+    
+    circle_center_vector = reverse_from_XYplane_to_original(
+                                                    circle_params_2d['center'], 
+                                                    plane_params, Rot_matrix)
+
+    out_dict = {'center': tuple(circle_center_vector), 
+                'radius': circle_params_2d['radius'],
+                'circle_normal_vector': plane_params[:3],
+                'circle_name': circle_name,
+                'offsets': merge_circle_offsets(
+                                    plane_statistics_dict['planer_offsets'],
+                                    circle_params_2d['point_radial_offsets']),
+                'plane_statistics': plane_statistics_dict['plane_statistics'],
+                'circle_statistics': circle_params_2d['statistics']}
+
+    return out_dict

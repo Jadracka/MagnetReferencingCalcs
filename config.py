@@ -23,6 +23,7 @@ log_fitted_objects = True
 log_statistics = True
 
 maximum_planar_offset = 1e-6
+point_transform_check_tolerance = 1e-2 #always in mm!!!
 
 # Output units for circle parameters
 output_units = {
