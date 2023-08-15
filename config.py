@@ -19,6 +19,7 @@ Created on Fri Jul 28 2023
 
 import os
 
+log = True
 log_fitted_objects = True
 log_statistics = True
 
@@ -34,6 +35,12 @@ output_units = {
 output_units_LT = {
     "distances": "mm",  # Choose from ["m", "cm", "mm", "um"]
     "angles": "gon"   # Choose from ["gon", "rad", "mrad", "deg"]
+}
+
+# Define the log precision dictionary in your configuration file
+log_precision = {
+    'distances': (0.1, 'um'),
+    'angles': (0.0001, 'gon')
 }
 
 log_filename = "Test_logs.txt"
@@ -64,6 +71,13 @@ test_plane1_path = os.path.join(current_dir, data_folder, "Plane_test_1.txt")
 
 planeANDcircle_test_points_path = os.path.join(current_dir, data_folder,
                                                planeANDcircle_test_points)
+
+if log and log_statistics:
+    log_statistics = True
+else: log_statistics = False
+
+if log:
+    log = (logfile_path, log_precision)
 
 """There will have to be a list of referenced angles between
     the systems of Keyence system and the outside world. It

@@ -8,7 +8,6 @@ Created on Thu Jul 13 09:40:21 2023
 
 import functions as fc
 import config as cg
-import numpy as np
 
 
 # keyence3d = fc.fit_circle_3D(fc.read_data_from_file(cg.keyence_path),
@@ -24,14 +23,5 @@ import numpy as np
 testing_circle_coefficients = fc.fit_circle_3D(
         fc.read_data_from_file(cg.planeANDcircle_test_points_path),
         cg.output_units_LT,
-        cg.point_transform_check_tolerance)
+        cg.point_transform_check_tolerance, cg.log, cg.log_statistics)
 
-
-
-
-
-
-v1 = np.array([0, 0, 1])
-v2 = np.array([0, 1, 0])
-rotation_matrix = fc.rotation_matrix_from_vectors(v1, v2)
-#print(rotation_matrix)
