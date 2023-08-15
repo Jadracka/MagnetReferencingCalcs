@@ -23,7 +23,7 @@ log_fitted_objects = True
 log_statistics = True
 
 maximum_planar_offset = 1e-6
-point_transform_check_tolerance = 1e-2 #always in mm!!!
+point_transform_check_tolerance = 1e-3  # always in mm!!!
 
 # Output units for circle parameters
 output_units = {
@@ -53,7 +53,8 @@ LT = "LT_meas_python_input.txt"
 planeANDcircle_test_points = "points_to_fit.txt"
 test_plane1 = "Plane_test_1.txt"
 
-# Create the full file path by joining the current directory and the subfolder name
+# Create the full file path by joining the current directory
+# and the subfolder name
 logfile_path = os.path.join(current_dir, log_folder, log_filename)
 circle_file = os.path.join(current_dir, data_folder, data_file)
 keyence_path = os.path.join(current_dir, data_folder, keyence1)
@@ -61,8 +62,9 @@ keyence2d_path = os.path.join(current_dir, data_folder, keyence2)
 LT_path = os.path.join(current_dir, data_folder, LT)
 test_plane1_path = os.path.join(current_dir, data_folder, "Plane_test_1.txt")
 
-planeANDcircle_test_points_path = os.path.join(current_dir, data_folder, planeANDcircle_test_points)
+planeANDcircle_test_points_path = os.path.join(current_dir, data_folder,
+                                               planeANDcircle_test_points)
 
-"""There will have to be a list of referenced angles between 
+"""There will have to be a list of referenced angles between
     the systems of Keyence system and the outside world. It
     will be stored in a dictionary here in config file."""
