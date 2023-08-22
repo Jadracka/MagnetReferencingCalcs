@@ -19,8 +19,7 @@ Created on Fri Jul 28 2023
 
 import os
 
-log = True
-log_fitted_objects = True
+log = False
 log_statistics = True
 
 maximum_planar_offset = 1e-6
@@ -40,10 +39,11 @@ output_units_LT = {
 # Define the log precision dictionary in your configuration file
 log_precision = {
     'distances': (0.1, 'um'),
-    'angles': (0.0001, 'gon')
+    'angles': (0.00001, 'gon')
 }
 
 log_filename = "Test_logs.txt"
+log_filename_1 = "Keyence_LT.txt"
 
 # Get the current directory (the directory where the script is located)
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -57,27 +57,24 @@ data_file = "Points_circle_test.txt"
 keyence1 = "Keyence_meas_python_input.txt"
 keyence2 = "Keyence_meas_python_input2d.txt"
 LT = "LT_meas_python_input.txt"
-planeANDcircle_test_points = "points_to_fit.txt"
-test_plane1 = "Plane_test_1.txt"
 
 # Create the full file path by joining the current directory
 # and the subfolder name
 logfile_path = os.path.join(current_dir, log_folder, log_filename)
-circle_file = os.path.join(current_dir, data_folder, data_file)
-keyence_path = os.path.join(current_dir, data_folder, keyence1)
+logfile_path_1 = os.path.join(current_dir, log_folder, log_filename_1)
+
+
+
 keyence2d_path = os.path.join(current_dir, data_folder, keyence2)
 LT_path = os.path.join(current_dir, data_folder, LT)
-test_plane1_path = os.path.join(current_dir, data_folder, "Plane_test_1.txt")
 
-planeANDcircle_test_points_path = os.path.join(current_dir, data_folder,
-                                               planeANDcircle_test_points)
 
 if log and log_statistics:
     log_statistics = True
 else: log_statistics = False
 
 if log:
-    log = (logfile_path, log_precision)
+    log = (logfile_path_1, log_precision)
 
 """There will have to be a list of referenced angles between
     the systems of Keyence system and the outside world. It

@@ -18,7 +18,6 @@ Note:
 - made together with ChatGPT, but tested by human.
 """
 
-
 import numpy as np
 from scipy.optimize import least_squares
 import datetime
@@ -519,7 +518,7 @@ def get_angle_scale(output_units):
 
 def get_angle_scale_unit(unit):
     if unit == "gon":
-        return 400.0
+        return 200 / np.pi
     elif unit == "rad":
         return 1.0
     elif unit == "mrad":
@@ -563,7 +562,8 @@ def make_residual_stats(residuals: Union[np.ndarray, list, tuple]):
     return statistics
 
 
-def fit_circle_2d(data_tuple, output_units, log_file_path=None):
+def fit_circle_2d(data_tuple, output_units, log=False,
+                  log_statistics=False):
     """
     Fit a circle to 2D data points using least squares optimization.
 
@@ -603,6 +603,7 @@ def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     """
     data_dict, file_path = data_tuple
     circle_name = os.path.splitext(os.path.basename(file_path))[0]
+
     # Extract data from the dictionary
     x, y = [], []
 
@@ -629,7 +630,7 @@ def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     if result.success:
         center_x, center_y, radius = result.x
     else:
-        print("No circle  could be fit to the data of {circle_name}.")
+        print("No circle could be fit to the data of {circle_name}.")
         return None
 
     # Scale the output based on output_units from config.py
@@ -638,26 +639,31 @@ def fit_circle_2d(data_tuple, output_units, log_file_path=None):
     # Scale the output
     center_x, center_y, radius = center_x * result_scale, center_y * \
         result_scale, radius * result_scale
+        
+    x = np.array(x) * result_scale
+    y = np.array(y) * result_scale
 
     # Calculate radial offsets
     radial_offsets = np.sqrt((x - center_x)**2 + (y - center_y)**2) - radius
 
+
     # Create a dictionary to store radial offsets for each point
     point_radial_offsets = {point_name: offset for point_name,
                             offset in zip(point_names, radial_offsets)}
-
     # Prepare statistics if requested
     statistics = make_residual_stats(radial_offsets)
+    result_dict = {"name": circle_name, "center": (center_x,
+                                                   center_y),
+                   "radius": radius, "circle_statistics": statistics,
+                   "radial_offsets": point_radial_offsets}
 
-    if log_file_path:
-        write_circle_fit_log(log_file_path, file_path, data_dict,
-                             {"center_x": center_x, "center_y": center_y},
-                             radius, output_units, statistics,
-                             log_statistics=False)
+    if log and not log_statistics:
+        write_2D_circle_fit_log(result_dict, output_units, log)
+    else:
+        write_2D_circle_fit_log(result_dict, output_units, log,
+                                log_statistics)
 
-    return {"name": circle_name, "center": (center_x, center_y),
-            "radius": radius, "statistics": statistics,
-            "point_radial_offsets": point_radial_offsets}
+    return result_dict
 
 
 def circle_residuals_2d(params, x, y):
@@ -734,7 +740,8 @@ def get_distance_scale(output_units):
                          f" specified.")
 
 
-def fit_plane(data_tuple, output_units, log_statistics='False'):
+def fit_plane(data_tuple, output_units, log_details=False,
+              log_statistics=False):
     """
     Fit a plane through 3D data points and calculate residual offsets.
 
@@ -829,13 +836,18 @@ def fit_plane(data_tuple, output_units, log_statistics='False'):
     # Prepare statistics if requested
     statistics = make_residual_stats(np.array(list(residual_dict.values())))
 
-    return plane_params, {'planer_offsets': residual_dict,
-                          'plane_statistics': statistics,
-                          'angles form axis': {'Rx': angles[0],
-                                               'Ry': angles[1],
-                                               'Rz': angles[2]
-                                               }
-                          }
+    result_dict = {'plane_parameters': plane_params,
+                   'planar_offsets': residual_dict,
+                   'plane_statistics': statistics,
+                   'angles_from_axis': {'Rx': angles[0],
+                                        'Ry': angles[1],
+                                        'Rz': angles[2]
+                                        }
+                   }
+
+    if log_details:
+        write_plane_fit_log(result_dict, output_units, log_details, log_statistics)
+    return result_dict
 
 
 def get_plane_angles(normal_vector, output_units):
@@ -1328,7 +1340,7 @@ def point_distance(point_data1, point_data2):
         return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 
 
-def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
+def compare_distances(dict1, dict2, tolerance, num_pairs='all', debug=False):
     """
     Compare distances between point pairs and check for discrepancies.
 
@@ -1396,11 +1408,11 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
             common_point_names) - 1) // 2)
         point_pairs = random.sample(list(combinations(
             common_point_names, 2)), num_pairs)
-
-    total_possible_pairs = len(common_point_names) * (len(
-        common_point_names) - 1) // 2
-    total_pairs_tested = len(point_pairs)
-    out_of_spec_pairs = 0
+    if debug:
+        total_possible_pairs = len(common_point_names) * (len(
+            common_point_names) - 1) // 2
+        total_pairs_tested = len(point_pairs)
+        out_of_spec_pairs = 0
     discrepancies = {}
 
     for point_name1, point_name2 in point_pairs:
@@ -1420,14 +1432,14 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all'):
             sorted_pair = tuple(sorted([point_name1, point_name2]))
             discrepancies[sorted_pair] = discrepancy
 
-    out_of_spec_pairs = len(discrepancies)
-
-#    print(f"Testing {total_pairs_tested} point pairs out of "
-#          f"{total_possible_pairs} possible pairs.")
-#    print(f"Found {out_of_spec_pairs} pairs out of spec.")
+    if out_of_spec_pairs: 
+        out_of_spec_pairs = len(discrepancies)
+        print(f"Testing {total_pairs_tested} point pairs out of "
+              f"{total_possible_pairs} possible pairs.")
+        print(f"Found {out_of_spec_pairs} pairs out of spec.")
 
     if len(discrepancies) == 0:
-        # print("All tested point pairs are within the tolerance.")
+        if debug: print("All tested point pairs are within the tolerance.")
         return True
     else:
         print(f"Maximum discrepancy is {max(discrepancies.values())},"
@@ -1643,7 +1655,7 @@ def merge_circle_offsets(dict1, dict2):
 
 
 def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
-                  log = False, log_statistics=False):
+                  log=False, log_statistics=False):
     """
     Fit a 3D circle to a set of 3D points in space.
 
@@ -1700,9 +1712,8 @@ def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
     circle_name = os.path.splitext(os.path.basename(file_path))[0]
 
     # see readin function's docstring.
-    plane_params, plane_statistics_dict = fit_plane(data_tuple,
-                                                    output_unit,
-                                                    log_statistics)
+    plane_dict = fit_plane(data_tuple, output_unit)
+    plane_params = plane_dict['plane_parameters']
 
     points_projected = project_points_onto_plane(data_dict, plane_params)
     points_transformed, Rot_matrix = rotate_to_xy_plane(points_projected,
@@ -1711,7 +1722,7 @@ def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
     if not compare_distances(data_dict, points_transformed,
                              point_transform_check_tolerance, 'all'):
         print(f"During the {circle_name} circle fitting process, there has "
-              f"been a difference in point-to-point distances between pre-"
+              f"been a difference inpoint-to-point distances between pre-"
               f" and post-transformation of tested pairs that exceeded "
               f"{point_transform_check_tolerance}mm .\nPlease review"
               f" the detailed statistics and take appropriate "
@@ -1728,15 +1739,16 @@ def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
                 'circle_normal_vector': plane_params[:3],
                 'circle_name': circle_name,
                 'offsets': merge_circle_offsets(
-                                    plane_statistics_dict['planer_offsets'],
-                                    circle_params_2d['point_radial_offsets']),
-                'plane_statistics': plane_statistics_dict['plane_statistics'],
-                'plane_angles_parameters': plane_statistics_dict[
-                    'angles form axis'],
-                'circle_statistics': circle_params_2d['statistics']}
+                                    plane_dict['planar_offsets'],
+                                    circle_params_2d['radial_offsets']),
+                'plane_statistics': plane_dict['plane_statistics'],
+                'plane_angles_parameters': plane_dict[
+                    'angles_from_axis'],
+                'circle_statistics': circle_params_2d['circle_statistics']}
     if log and not log_statistics:
         write_3D_circle_fit_log(out_dict, output_unit, log)
-    else: write_3D_circle_fit_log(out_dict, output_unit, log, log_statistics)
+    else:
+        write_3D_circle_fit_log(out_dict, output_unit, log, log_statistics)
 
     return out_dict
 
@@ -1771,7 +1783,8 @@ def write_3D_circle_fit_log(results_dict, output_units, log_details,
     file is formatted with date and time information, as well as fitting 
     details and optional statistics if requested.
     """
-
+    if not log_details:
+        return False
     log_path, log_precision = log_details
     decimal_places_distances, decimal_places_angles = calculate_decimal_places(output_units, log_precision)
 
@@ -1821,7 +1834,7 @@ def write_3D_circle_fit_log(results_dict, output_units, log_details,
                 for point_id, offset_dict in offsets.items():
                     planar_offset = offset_dict.get('planar_offset', 'N/A')
                     radial_offset = offset_dict.get('radial_offset', 'N/A')
-        
+
                     # Format and align the columns with specified decimal places
                     planar_str = \
                     f"{planar_offset:.{decimal_places_distances}f}".rjust(12)
@@ -1867,7 +1880,7 @@ def calculate_decimal_places(output_units, log_precision):
       6. Determines the number of decimal places required for angles based on
          the scaled log precision.
     """
-    
+
     distances_precision, distances_precision_unit = log_precision['distances']
     angles_precision, angles_precision_unit = log_precision['angles']
 
@@ -1896,7 +1909,7 @@ def calculate_decimal_places(output_units, log_precision):
     decimal_places_distances = max(-int(np.floor(np.log10(
         log_precision_scaled_output))), 0)
     # print(f'decimal_places_distances:{decimal_places_distances}')
-    
+
     # Scale log_precision for angles to radians
     if angles_precision_unit != 'rad':
         log_precision_scaled_rad = angles_precision * get_angle_scale_unit(
@@ -1906,13 +1919,194 @@ def calculate_decimal_places(output_units, log_precision):
 
     # Scale log_precision in radians to the units of output_units
     if output_units['angles'] != 'rad':
-        log_precision_scaled_output_angles = log_precision_scaled_rad / \
+        log_precision_scaled_output_angles = log_precision_scaled_rad * \
             get_angle_scale(output_units)
     else:
         log_precision_scaled_output_angles = log_precision_scaled_rad
-
     # Determine the number of decimal places for angles
     decimal_places_angles = int(np.floor(
         np.log10(1.0 / log_precision_scaled_output_angles)))
 
     return decimal_places_distances+1, decimal_places_angles+1
+
+
+def write_2D_circle_fit_log(results_dict, output_units,
+                            log_details, log_statistics=False):
+    """
+    Write fitting results and statistics of a 2D circle fit to a log file.
+
+    Parameters
+    ----------
+    results_dict : dict
+        Dictionary containing the results of the 2D circle fit. The dictionary
+        should include various parameters and statistics related to the fit.
+    output_units : dict
+        Dictionary specifying the units to use for distances and angles.
+    log_details : tuple
+        A tuple containing the log file path and log precision settings.
+    log_statistics : bool, optional
+        Flag indicating whether to log the statistics, by default False.
+
+    Returns
+    -------
+    bool
+        Returns True if the log file was successfully written.
+
+    Note
+    ----
+    This function writes the results of a 2D circle fitting operation and
+    associated statistics to a log file. It receives the path to the log file
+    and a dictionary containing the results of the 2D circle fit. The
+    dictionary should include parameters such as the circle's center, radius,
+    and circle statistics. The log file is formatted with date and time
+    information, as well as fitting details and optional statistics if
+    requested.
+    """
+    if not log_details:
+        return False
+
+    log_path, log_precision = log_details
+    decimal_places_distances, decimal_places_angles = calculate_decimal_places(
+        output_units, log_precision)
+
+    with open(log_path, 'a+') as log_file:
+        circle_name = results_dict.get('name', 'Unknown Circle')
+        distances_unit = output_units.get('distances', 'N/A')
+        angles_unit = output_units.get('angles', 'N/A')
+
+        # Write header with date and time of calculation
+        log_file.write("_" * 100)
+        log_file.write("\n2D Circle Fitting Results:\n")
+        log_file.write("Calculation Date: {}\n".format(
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        log_file.write("Circle Name: {}\n".format(circle_name))
+        log_file.write(f"Units: Distances [{distances_unit}], "
+                       f"Angles [{angles_unit}]\n")
+        log_file.write("\n")
+
+        # Write circle fitting results with formatted numbers
+        log_file.write("Center: {}\n".format(
+            tuple(format(value, f".{decimal_places_distances}f")
+                  for value in results_dict.get('center', ('N/A', 'N/A')))))
+        log_file.write("Radius: {}\n".format(
+            format(results_dict.get('radius', 'N/A'),
+                   f".{decimal_places_distances}f")))
+        log_file.write("\n")
+
+        if log_statistics:
+            circle_statistics = results_dict.get('circle_statistics', {})
+            log_file.write("Circle Fit Statistics:\n")
+            for key, value in circle_statistics.items():
+                if isinstance(value, float):
+                    value_str = f"{value:.{decimal_places_distances}f}"
+                else:
+                    value_str = value
+                log_file.write("{}: {}\n".format(key, value_str))
+            log_file.write("\n")
+            # Write offsets as a table
+            offsets = results_dict.get('radial_offsets', {})
+
+            # Write offsets as a table
+            offsets = results_dict.get('radial_offsets', {})
+            if offsets:
+                log_file.write("Offsets:\n")
+                log_file.write("Point ID Radial Offset\n")
+                for point_id, radial_offset in offsets.items():
+                    radial_str = f"{radial_offset:.{decimal_places_distances}f}".rjust(12)
+                    log_file.write(f"{point_id}\t{radial_str}\n")
+                log_file.write("\n")
+
+    return True  # Indicates successful writing
+
+
+def write_plane_fit_log(result_dict, output_units,
+                        log_details, log_statistics=False):
+    """
+    Write fitting results and statistics of a plane fit to a log file.
+
+    Parameters
+    ----------
+    result_dict : dict
+        Dictionary containing the results of the plane fit. The dictionary
+        should include various parameters and statistics related to the fit.
+    log_details : tuple
+        A tuple containing the log file path and log precision settings.
+    log_statistics : bool, optional
+        Flag indicating whether to log the statistics, by default False.
+
+    Returns
+    -------
+    bool
+        Returns True if the log file was successfully written.
+
+    Note
+    ----
+    This function writes the results of a plane fitting operation and associated
+    statistics to a log file. It receives the path to the log file and a
+    dictionary containing the results of the plane fit. The dictionary should
+    include parameters such as the plane's parameters, planar offsets, plane
+    statistics, and angles from the axis. The log file is formatted with date
+    and time information, as well as fitting details and optional statistics if
+    requested.
+    """
+    if not log_details:
+        return False
+
+    log_path, log_precision = log_details
+    decimal_places_distances, decimal_places_angles = calculate_decimal_places(
+        output_units, log_precision)
+
+    with open(log_path, 'a+') as log_file:
+        # Write header with date and time of calculation
+        distances_unit = output_units.get('distances', 'N/A')
+        angles_unit = output_units.get('angles', 'N/A')
+        log_file.write("_" * 100)
+        log_file.write("\nPlane Fitting Results:\n")
+        log_file.write("Calculation Date: {}\n".format(
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        log_file.write(f"Units: Distances [{distances_unit}], Angles [{angles_unit}]\n")
+        log_file.write("\n")
+
+        # Write plane parameters
+        plane_params = result_dict.get('plane_parameters',
+                                       ('N/A', 'N/A', 'N/A', 'N/A'))
+        log_file.write("Plane Parameters: {}\n".format(
+            tuple(format(value, f".{decimal_places_distances}f")
+                  for value in plane_params)))
+        log_file.write("\n")
+
+        # Write angles from the axis
+        angles_from_axis = result_dict.get('angles_from_axis', {})
+        log_file.write("Angles from Axis:\n")
+
+        for key, value in angles_from_axis.items():
+            if isinstance(value, float):
+                angle_str = f"{value:.{decimal_places_angles}f}"
+            else:
+                angle_str = str(value)
+            log_file.write("{}: {}\n".format(key, angle_str))
+        log_file.write("\n")
+
+        if log_statistics:
+            plane_statistics = result_dict.get('plane_statistics', {})
+            log_file.write("Plane Fit Statistics:\n")
+            for key, value in plane_statistics.items():
+                if isinstance(value, float):
+                    value_str = f"{value:.{decimal_places_distances}f}"
+                else:
+                    value_str = value
+                log_file.write("{}: {}\n".format(key, value_str))
+            log_file.write("\n")
+            # Write planar offsets as a table
+            planar_offsets = result_dict.get('planar_offsets', {})
+            if planar_offsets:
+                log_file.write("Planar Offsets:\n")
+                log_file.write("Point ID Planar Offset\n")
+                for point_id, planar_offset in planar_offsets.items():
+                    planar_str = \
+                        f"{planar_offset:.{decimal_places_distances}f}"\
+                        .rjust(12)
+                    log_file.write(f"{point_id}\t{planar_str}\n")
+                log_file.write("\n")
+
+    return True  # Indicates successful writing
