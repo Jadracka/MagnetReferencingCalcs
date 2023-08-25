@@ -1432,7 +1432,7 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all', debug=False):
             sorted_pair = tuple(sorted([point_name1, point_name2]))
             discrepancies[sorted_pair] = discrepancy
 
-    if out_of_spec_pairs: 
+    if debug: 
         out_of_spec_pairs = len(discrepancies)
         print(f"Testing {total_pairs_tested} point pairs out of "
               f"{total_possible_pairs} possible pairs.")
