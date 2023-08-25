@@ -21,6 +21,7 @@ import os
 
 log = False
 log_statistics = True
+debug = False
 
 maximum_planar_offset = 1e-6
 point_transform_check_tolerance = 1e-3  # always in mm!!!

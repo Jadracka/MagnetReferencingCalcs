@@ -299,47 +299,6 @@ def generate_noisy_ellipse_points(a, b, center_x, center_y, num_points,
     return x, y
 
 
-def generate_ellipse_points(center, semi_major_axis, semi_minor_axis,
-                            num_points):
-    """Generate points along an ellipse.
-
-    Parameters
-    ----------
-    center : tuple of float
-        Center coordinates of the ellipse (x, y).
-    semi_major_axis : float
-        Length of the semi-major axis.
-    semi_minor_axis : float
-        Length of the semi-minor axis.
-    num_points : int
-        Number of points to generate on the ellipse.
-
-    Returns
-    -------
-    x_points : numpy.ndarray
-        Array of x-coordinates of generated points.
-    y_points : numpy.ndarray
-        Array of y-coordinates of generated points.
-
-    Example
-    -------
-    Center = (3, 4)
-    Semi_major_axis = 5
-    Semi_minor_axis = 3
-    Num_points = 100
-    x_points, y_points = generate_ellipse_points(Center, Semi_major_axis,
-                                                 Semi_minor_axis, Num_points)
-    """
-    angles = np.linspace(0, 2 * np.pi, num_points)
-    cos_angles = np.cos(angles)
-    sin_angles = np.sin(angles)
-
-    x_points = center[0] + semi_major_axis * cos_angles
-    y_points = center[1] + semi_minor_axis * sin_angles
-
-    return x_points, y_points
-
-
 def read_data_from_file(file_path):
     """
     Read data from a file and return it as a dictionary.
@@ -488,6 +447,7 @@ def distance_to_mm(unit):
     else:
         raise ValueError("Invalid coordinate unit specified.")
 
+
 def get_angle_scale(output_units):
     """
     Calculate the scaler to convert angles to rads based on the output_units.
@@ -527,6 +487,7 @@ def get_angle_scale_unit(unit):
         return 180.0 / np.pi
     else:
         raise ValueError("Invalid angle unit specified in the header.")
+
 
 def make_residual_stats(residuals: Union[np.ndarray, list, tuple]):
     """
