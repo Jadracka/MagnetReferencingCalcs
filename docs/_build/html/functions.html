@@ -1,0 +1,1116 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>functions module &#8212; Magnet Referencing Calculations Documentation 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-functions">
+<span id="functions-module"></span><h1>functions module<a class="headerlink" href="#module-functions" title="Permalink to this heading">¶</a></h1>
+<p>Functions.</p>
+<p>Functions for Magnet Referencing Code.</p>
+<p>Author: Jana Barker
+Date: Created on Fri Jul 28 13:54:12 2023</p>
+<section id="description">
+<h2>Description:<a class="headerlink" href="#description" title="Permalink to this heading">¶</a></h2>
+<p>This is a file containing all functions necessary in orther to fit circles into
+measured 3D or 2D points.
+This file also contains functions to read in a Spatial Analyzer output file
+and pars it into needed dictionaries.</p>
+</section>
+<section id="note">
+<h2>Note:<a class="headerlink" href="#note" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>made together with ChatGPT, but tested by human.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.calculate_decimal_places">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">calculate_decimal_places</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_precision</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#calculate_decimal_places"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.calculate_decimal_places" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate decimal places based on output units and log precision.</p>
+<p>This function calculates the number of decimal places required for both
+distances and angles in the context of logging fitting results. It takes
+into account the output units and the specified log precision for distances
+and angles.</p>
+<dl class="simple">
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>Dictionary specifying the units used for output distances and angles.</p>
+</dd>
+<dt>log_precision<span class="classifier">dict</span></dt><dd><p>Dictionary specifying the log precision for distances and angles.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>tuple</dt><dd><p>A tuple containing two integers representing the number of decimal
+places needed for distances and angles in the log.</p>
+</dd>
+</dl>
+<ul>
+<li><p>The function performs the following steps:
+1. Scales the log precision to millimeters (mm).
+2. Scales the log precision in millimeters to the units of the</p>
+<blockquote>
+<div><p>output_units.</p>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Determines the number of decimal places required for distances based
+on the scaled log precision.</p></li>
+<li><p>Scales the log precision for angles to radians.</p></li>
+<li><p>Scales the log precision in radians to the units of the output_units.</p></li>
+<li><p>Determines the number of decimal places required for angles based on
+the scaled log precision.</p></li>
+</ol>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.cartesian_to_spherical">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">cartesian_to_spherical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#cartesian_to_spherical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.cartesian_to_spherical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Cartesian coordinates to spherical coordinates.</p>
+<p>Converts the given Cartesian coordinates (x, y, z) to spherical coordinates
+(r, theta, phi).
+r represents the radial distance from the origin to the point.
+theta represents the inclination angle measured from the positive z-axis.
+phi represents the azimuthal angle measured from the positive x-axis.</p>
+<p>x (float): x-coordinate in Cartesian space.
+y (float): y-coordinate in Cartesian space.
+z (float): z-coordinate in Cartesian space.</p>
+<p>tuple: A tuple containing (r, theta, phi) in spherical coordinates.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cartesian_to_spherical</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">(1.7320508075688772, 0.9553166181245093, 0.7853981633974483)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cartesian_to_spherical</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">(2.0, 1.5707963267948966, 0.0)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.check_plane_projection">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">check_plane_projection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normal_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#check_plane_projection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.check_plane_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the points lie on fitted plane or need to be projected onto it.</p>
+<dl class="simple">
+<dt>points<span class="classifier">list of tuples</span></dt><dd><p>List of (x, y, z) points to be checked.</p>
+</dd>
+<dt>center<span class="classifier">tuple</span></dt><dd><p>Center of the fitted plane in (x, y, z) coordinates.</p>
+</dd>
+<dt>normal_vector<span class="classifier">tuple</span></dt><dd><p>Normal vector of the fitted plane in (a, b, c) form.</p>
+</dd>
+<dt>tolerance<span class="classifier">float</span></dt><dd><p>Maximum allowable residual to consider points lying on the plane.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool</dt><dd><p>True if points lie on the plane, False if points need to be projected
+onto the plane.</p>
+</dd>
+</dl>
+<p>This function checks whether a list of given points lies on the fitted
+plane, based on their residuals from the plane. The parameters include the
+points to be checked, the center and normal vector of the fitted plane, and
+a tolerance value for residuals. The function calculates the residuals of
+each point from the plane and checks if the maximum residual is within the
+specified tolerance. If the maximum residual is below the tolerance, the
+function returns True, indicating that the points lie on the plane.
+Otherwise, it returns False, indicating that the points need to be
+projected onto the plane.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.circle_residuals_2d">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">circle_residuals_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#circle_residuals_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.circle_residuals_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the residuals for 2D circle fitting.</p>
+<dl class="simple">
+<dt>params<span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing the parameters of the circle: center_x, center_y, and
+radius.</p>
+</dd>
+<dt>x<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of x-coordinates of data points.</p>
+</dd>
+<dt>y<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of y-coordinates of data points.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Array of residuals representing the difference between the distances
+of data points from the circle’s circumference and the circle’s radius.</p>
+</dd>
+</dl>
+<p>This function calculates the residuals for 2D circle fitting. It takes the
+center coordinates (center_x, center_y) and radius of the circle as
+parameters, along with arrays of x and y coordinates of data points. The
+residuals are the differences between the distances of data points from the
+circle’s circumference and the circle’s radius.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.compare_distances">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">compare_distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#compare_distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.compare_distances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare distances between point pairs and check for discrepancies.</p>
+<p>Given two dictionaries of 3D points, this function compares the distances
+between corresponding pairs of points. It calculates the discrepancies in
+distances between the points from both dictionaries, considering a
+specified tolerance. The function returns a dictionary of point pairs with
+discrepancies that exceed the tolerance.</p>
+<dl class="simple">
+<dt>dict1<span class="classifier">dict</span></dt><dd><p>Dictionary containing point data with names as keys and (X, Y, Z)
+coordinates as values.</p>
+</dd>
+<dt>dict2<span class="classifier">dict</span></dt><dd><p>Another dictionary with the same structure as ‘dict1’ containing point
+data.</p>
+</dd>
+<dt>tolerance<span class="classifier">float</span></dt><dd><p>Maximum allowable discrepancy between distances to consider as within
+tolerance.</p>
+</dd>
+<dt>num_pairs<span class="classifier">int or str, optional</span></dt><dd><p>Number of point pairs to compare. If ‘all’, compare all possible pairs.
+Default is ‘all’.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool or dict</dt><dd><p>If all tested point pairs are within the tolerance, returns True.
+Otherwise, returns a dictionary of point pairs and their discrepancies
+that exceed the specified tolerance.</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>The ‘coordinate_unit’ key in the dictionaries specifies the unit of
+coordinates.</p></li>
+<li><p>The function compares distances between corresponding points in both
+dictionaries.</p></li>
+<li><p>Point pairs with discrepancies exceeding the tolerance are considered
+out of spec.</p></li>
+</ul>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">point_data1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="go">                                                        &#39;Z&#39;: 6}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_data2</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="go">                                                        &#39;Z&#39;: 6.5}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tolerance</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">compare_distances</span><span class="p">(</span><span class="n">point_data1</span><span class="p">,</span> <span class="n">point_data2</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All point pairs are within tolerance.&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">else</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Point pairs with discrepancies:&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">pair</span><span class="p">,</span> <span class="n">discrepancy</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pair</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">discrepancy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> mm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.degrees_to_radians">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">degrees_to_radians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">degrees</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#degrees_to_radians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.degrees_to_radians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an angle in degrees to radians.</p>
+<p>This function takes an angle in degrees and returns its equivalent
+angle in radians.</p>
+<p>degrees (float): Angle in degrees to be converted to radians.</p>
+<p>float: Angle in radians equivalent to the input angle in degrees.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">degrees_to_radians</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
+<span class="go">3.141592653589793</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">degrees_to_radians</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+<span class="go">1.5707963267948966</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.distance_to_mm">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">distance_to_mm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#distance_to_mm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.distance_to_mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a coordinate unit to millimeters.</p>
+<p>Converts a coordinate unit to its equivalent value in millimeters.</p>
+<dl class="simple">
+<dt>unit<span class="classifier">str</span></dt><dd><p>The coordinate unit to be converted. Should be one of “um”, “mm”, “cm”,
+or “m”.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>float</dt><dd><p>The equivalent value of the coordinate unit in millimeters.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If the input coordinate unit is not one of “um”, “mm”, “cm”, or “m”.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">distance_to_mm</span><span class="p">(</span><span class="s2">&quot;mm&quot;</span><span class="p">)</span>
+<span class="go">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">distance_to_mm</span><span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">)</span>
+<span class="go">10.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">distance_to_mm</span><span class="p">(</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+<span class="go">1000.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.fit_circle_2d">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">fit_circle_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#fit_circle_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.fit_circle_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a circle to 2D data points using least squares optimization.</p>
+<dl class="simple">
+<dt>data_tuple<span class="classifier">tuple</span></dt><dd><p>A tuple containing a dictionary of data points and the file path
+associated with the data.</p>
+</dd>
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>A dictionary specifying the desired output units for the circle’s
+parameters.</p>
+</dd>
+<dt>log_file_path<span class="classifier">str, optional</span></dt><dd><p>Path to a log file for recording fit details (default is None).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>dict or None</dt><dd><p>A dictionary containing information about the fitted circle if
+successful:
+- “name”: Name of the fitted circle.
+- “center”: Tuple containing (center_x, center_y) coordinates of the
+circle’s center.
+- “radius”: Radius of the fitted circle.
+- “statistics”: Dictionary containing statistics about the radial
+offsets.
+- “point_radial_offsets”: Dictionary containing radial offsets for
+each data point.
+Returns None if the circle fitting fails.</p>
+</dd>
+</dl>
+<p>This function fits a circle in 2D using least squares optimization. It
+extracts data from the input dictionary,
+fits a circle, scales the output based on the specified output units,
+calculates radial offsets,
+and provides various statistics about the fitting results.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.fit_circle_3D">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">fit_circle_3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_transform_check_tolerance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#fit_circle_3D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.fit_circle_3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a 3D circle to a set of 3D points in space.</p>
+<p>Given a data tuple containing a dictionary of 3D points and the associated
+file path, this function performs a circle fitting process in 3D space. It
+begins by fitting a plane to the given points using the ‘fit_plane’
+function. The points are then projected onto this fitted plane, followed by
+a rotation transformation that aligns the plane with the XY plane. The
+distances between the original and transformed points are compared using
+the ‘compare_distances’ function to check for any discrepancies after the
+transformation.</p>
+<dl class="simple">
+<dt>data_tuple (tuple): A tuple containing the dictionary of 3D points and the</dt><dd><p>associated file path.</p>
+</dd>
+</dl>
+<p>output_unit (dict): Dictionary specifying the output units for distances.
+point_transform_check_tolerance (float): Tolerance for checking differences</p>
+<blockquote>
+<div><p>in point-to-point distances after
+transformation.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>log_statistics (bool, optional): If True, log statistics will be generated</dt><dd><p>and stored. Defaults to False.</p>
+</dd>
+<dt>print_statistics (bool, optional): If True, statistics will be printed.</dt><dd><p>Defaults to False.</p>
+</dd>
+</dl>
+<p>dict: A dictionary containing the fitted circle parameters and associated
+information, including:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘center’: The 3D coordinates of the circle’s center.</p></li>
+<li><p>‘radius’: The radius of the fitted circle.</p></li>
+<li><dl class="simple">
+<dt>‘circle_normal_vector’: The normal vector of the fitted circle’s</dt><dd><p>plane.</p>
+</dd>
+</dl>
+</li>
+<li><p>‘circle_name’: The name of the circle.</p></li>
+<li><p>‘offsets’: Dictionary containing planar and radial offsets.</p></li>
+<li><p>‘plane_statistics’: Statistics from the fitted plane.</p></li>
+<li><dl class="simple">
+<dt>‘plane_angles_parameters’: Parameters related to angles of the</dt><dd><p>fitted plane.</p>
+</dd>
+</dl>
+</li>
+<li><p>‘circle_statistics’: Statistics from the fitted circle.</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>The function performs circle fitting in the following steps:</dt><dd><ol class="arabic simple">
+<li><p>Fit a plane to the 3D points.</p></li>
+<li><p>Project points onto the fitted plane.</p></li>
+<li><p>Rotate the points to align with the XY plane.</p></li>
+<li><dl class="simple">
+<dt>Check for differences in point-to-point distances before and after</dt><dd><p>transformation.</p>
+</dd>
+</dl>
+</li>
+<li><p>Fit a 2D circle to the rotated points.</p></li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>The output dictionary contains various statistical information about the</dt><dd><p>fitted plane and circle.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.fit_plane">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">fit_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_details</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#fit_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.fit_plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a plane through 3D data points and calculate residual offsets.</p>
+<dl class="simple">
+<dt>data_tuple<span class="classifier">tuple</span></dt><dd><p>Tuple containing the data dictionary and the file path.</p>
+</dd>
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>Dictionary specifying the desired output units.</p>
+</dd>
+<dt>log_statistics<span class="classifier">str, optional</span></dt><dd><p>Whether to log statistics, by default ‘False’.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>tuple</dt><dd><p>Tuple containing the plane parameters and a dictionary with
+plane offsets and statistics.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If the input data does not contain sufficient 3D points for
+plane fitting.</p>
+</dd>
+</dl>
+<p>This function fits a plane through 3D data points and calculates the
+residual offsets of each point from the fitted plane. The input data
+is expected to be in the form of a data dictionary containing ‘X’, ‘Y’,
+and ‘Z’ coordinates. The function returns the plane parameters as
+(a, b, c, d) coefficients of the plane equation: ax + by + cz + d = 0.
+Additionally, it returns a dictionary containing point names as keys
+and their residual offsets from the fitted plane as values, along with
+statistics calculated from the residuals.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.generate_ellipse_points">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">generate_ellipse_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_major_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semi_minor_axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#generate_ellipse_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.generate_ellipse_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate points along an ellipse.</p>
+<dl class="simple">
+<dt>center<span class="classifier">tuple of float</span></dt><dd><p>Center coordinates of the ellipse (x, y).</p>
+</dd>
+<dt>semi_major_axis<span class="classifier">float</span></dt><dd><p>Length of the semi-major axis.</p>
+</dd>
+<dt>semi_minor_axis<span class="classifier">float</span></dt><dd><p>Length of the semi-minor axis.</p>
+</dd>
+<dt>num_points<span class="classifier">int</span></dt><dd><p>Number of points to generate on the ellipse.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>x_points<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of x-coordinates of generated points.</p>
+</dd>
+<dt>y_points<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of y-coordinates of generated points.</p>
+</dd>
+</dl>
+<p>Center = (3, 4)
+Semi_major_axis = 5
+Semi_minor_axis = 3
+Num_points = 100
+x_points, y_points = generate_ellipse_points(Center, Semi_major_axis,</p>
+<blockquote>
+<div><p>Semi_minor_axis, Num_points)</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.generate_noisy_ellipse_points">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">generate_noisy_ellipse_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_dev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#generate_noisy_ellipse_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.generate_noisy_ellipse_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate points along a noisy ellipse.</p>
+<dl class="simple">
+<dt>a<span class="classifier">float</span></dt><dd><p>Semi-major axis of the ellipse.</p>
+</dd>
+<dt>b<span class="classifier">float</span></dt><dd><p>Semi-minor axis of the ellipse.</p>
+</dd>
+<dt>center_x<span class="classifier">float</span></dt><dd><p>x-coordinate of the center of the ellipse.</p>
+</dd>
+<dt>center_y<span class="classifier">float</span></dt><dd><p>y-coordinate of the center of the ellipse.</p>
+</dd>
+<dt>num_points<span class="classifier">int</span></dt><dd><p>Number of points to generate.</p>
+</dd>
+<dt>std_dev<span class="classifier">float</span></dt><dd><p>Standard deviation for the noise added to the points.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>x<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of x-coordinates of the generated points.</p>
+</dd>
+<dt>y<span class="classifier">numpy.ndarray</span></dt><dd><p>Array of y-coordinates of the generated points.</p>
+</dd>
+</dl>
+<p>a = 3.0
+b = 1.5
+center_x = 2.0
+center_y = 1.0
+num_points = 100
+std_dev = 0.1
+x, y = generate_noisy_ellipse_points(a, b, center_x, center_y,</p>
+<blockquote>
+<div><p>num_points, std_dev)</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.get_angle_scale">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">get_angle_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#get_angle_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.get_angle_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the scaler to convert angles to rads based on the output_units.</p>
+<dl class="simple">
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>A dictionary containing units for different quantities.
+Example: {“angles”: “deg”} for degrees.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>float</dt><dd><p>The scaling factor to convert angles to radians.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.get_angle_scale_unit">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">get_angle_scale_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#get_angle_scale_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.get_angle_scale_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.get_distance_scale">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">get_distance_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#get_distance_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.get_distance_scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the scaling factor for distance units.</p>
+<dl class="simple">
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>Dictionary containing the desired output units, including ‘distances’.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>float</dt><dd><p>Scaling factor for converting distances from the specified
+output units to millimeters.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If an invalid distance unit is specified in the ‘distances’
+field of the output_units dictionary.</p>
+</dd>
+</dl>
+<p>This function calculates and returns the scaling factor to convert
+distances from the specified output units to millimeters. The valid
+distance units are “m” (meters), “cm” (centimeters), “mm”
+(millimeters), and “um” (micrometers). If an invalid distance unit
+is specified, a ValueError is raised.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.get_plane_angles">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">get_plane_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normal_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#get_plane_angles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.get_plane_angles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the angles of a plane’s normal vector to CS’ axes.</p>
+<dl class="simple">
+<dt>normal_vector<span class="classifier">np.ndarray</span></dt><dd><p>Normal vector of the plane.</p>
+</dd>
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>Dictionary specifying the desired output units.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>tuple</dt><dd><p>Tuple containing the angles in radians or converted output units.</p>
+</dd>
+</dl>
+<p>This function calculates the angles of a plane’s normal vector
+with respect to the coordinate axes. The normal vector should be
+provided as a NumPy ndarray. The function returns a tuple containing
+the angles calculated for the X, Y, and Z axes. The angles are
+expressed in radians by default or can be converted to the desired
+output units specified in the <cite>output_units</cite> dictionary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.get_variable_name">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">get_variable_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#get_variable_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.get_variable_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the name of a variable.</p>
+<p>This function takes a variable and returns its name as a string. It does
+so by examining the calling frame’s locals and globals dictionaries.</p>
+<dl class="simple">
+<dt>variable<span class="classifier">any</span></dt><dd><p>The variable for which the name is to be retrieved.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>str</dt><dd><p>The name of the given variable as a string.</p>
+</dd>
+</dl>
+<p>Example usage:
+&gt;&gt;&gt; name = “John”
+&gt;&gt;&gt; age = 30
+&gt;&gt;&gt; variable_name_as_string = get_variable_name(name)
+&gt;&gt;&gt; print(variable_name_as_string)
+‘name’</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.gon_to_radians">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">gon_to_radians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#gon_to_radians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.gon_to_radians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert an angle in gradians (gons) to radians.</p>
+<p>This function takes an angle in gradians and returns its equivalent
+angle in radians.</p>
+<p>gon (float): Angle in gradians (gons) to be converted to radians.</p>
+<p>float: Angle in radians equivalent to the input angle in gradians.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gon_to_radians</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+<span class="go">3.141592653589793</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gon_to_radians</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="go">1.5707963267948966</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.make_residual_stats">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">make_residual_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#make_residual_stats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.make_residual_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate various statistical measures from a set of residuals.</p>
+<dl class="simple">
+<dt>residuals<span class="classifier">numpy.ndarray or list or tuple</span></dt><dd><p>The residuals to compute statistics for.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>dict</dt><dd><p>A dictionary containing the following statistical measures:
+- “Standard Deviation”: Standard deviation of the residuals.
+- “Maximum <a href="#id1"><span class="problematic" id="id2">|Residual|</span></a>”: Maximum absolute value of the residuals.
+- “Minimum <a href="#id3"><span class="problematic" id="id4">|Residual|</span></a>”: Minimum absolute value of the residuals.
+- “RMS”: Root Mean Square (RMS) of the residuals.
+- “Mean”: Mean value of the residuals.
+- “Median”: Median value of the residuals.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.merge_circle_offsets">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">merge_circle_offsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#merge_circle_offsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.merge_circle_offsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge two dictionaries containing circle offsets into a single dictionary.</p>
+<p>Given two dictionaries containing circle offsets, one with ‘planar_offset’
+and the other with ‘radial_offset’, this function merges the two
+dictionaries into a single dictionary. The merged dictionary will have
+point names as keys, and for each point, it will include both
+‘planar_offset’ and ‘radial_offset’ values.</p>
+<dl class="simple">
+<dt>{dict1_name}<span class="classifier">dict</span></dt><dd><p>Dictionary containing ‘planar_offset’ values for circle points, with
+point names as keys.</p>
+</dd>
+<dt>{dict2_name}<span class="classifier">dict</span></dt><dd><p>Dictionary containing ‘radial_offset’ values for circle points, with
+point names as keys.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>dict</dt><dd><p>Merged dictionary containing point names as keys and a sub-dictionary
+with ‘planar_offset’ and ‘radial_offset’ values as values.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If the dictionaries do not have the same set of point names.</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>The function assumes that both dictionaries share common point names.</p></li>
+<li><p>The merged dictionary will include a sub-dictionary for each common
+point name, with ‘planar_offset’ and ‘radial_offset’ values from
+{dict1_name} and {dict2_name}, respectively.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.plot_cartesian_3d">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">plot_cartesian_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#plot_cartesian_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.plot_cartesian_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot points in a 3D Cartesian CS with optional plane visualization.</p>
+<p>Given a dictionary of 3D points and optional plane coefficients, this
+function creates a 3D plot of the points in a Cartesian coordinate system.
+Points are scattered in 3D space, with their names annotated near each
+point. If plane coefficients are provided, the fitted plane is also
+visualized in the plot.</p>
+<dl class="simple">
+<dt>points_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing point data with names as keys and (X, Y, Z)
+coordinates as values.</p>
+</dd>
+<dt>plane_params<span class="classifier">tuple or None, optional</span></dt><dd><p>Coefficients of the fitted plane in the form (a, b, c, d), where ‘a’,
+‘b’, and ‘c’ are the normal vector components, and ‘d’ is the offset of
+the plane. If None, no plane visualization is added. Default is None.</p>
+</dd>
+</dl>
+<p>None</p>
+<ul class="simple">
+<li><p>The ‘coordinate_unit’ key in the dictionary specifies the unit of
+coordinates.</p></li>
+<li><p>Points are scattered in 3D space, and their names are annotated near
+each point.</p></li>
+<li><p>If ‘plane_params’ is provided, the fitted plane is visualized as a
+surface in the plot.</p></li>
+</ul>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">point_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+<span class="go">                                                       &#39;Z&#39;: 6}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plot_cartesian_3d</span><span class="p">(</span><span class="n">point_data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plot_cartesian_3d</span><span class="p">(</span><span class="n">point_data</span><span class="p">,</span> <span class="n">plane_params</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.plot_points_2d">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">plot_points_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#plot_points_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.plot_points_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot givenpoints in 2D.</p>
+<p>Given a dictionary of 3D or 2D points, this function generates a 2D scatter
+plot of the points. The points’ X and Y coordinates are extracted from the
+dictionary, and each point is annotated with its name.</p>
+<dl class="simple">
+<dt>points_rotated<span class="classifier">dict</span></dt><dd><p>Dictionary containing points with names as keys and (X, Y, Z)
+coordinates as values.</p>
+</dd>
+</dl>
+<p>None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.plot_spherical_3d">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">plot_spherical_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#plot_spherical_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.plot_spherical_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot 3D points in a spherical coordinate system.</p>
+<p>Given a dictionary of 3D points defined in spherical coordinates (radius
+‘d’, azimuthal angle ‘Hz’, and polar angle ‘V’), this function creates a
+3D plot of the points in a spherical coordinate system. Points are
+scattered in 3D space based on their spherical coordinates, and their names
+are annotated near each point.</p>
+<dl class="simple">
+<dt>points_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing point data with names as keys and spherical
+coordinates as values. Each point’s data should include ‘d’ (radius),
+‘Hz’ (azimuthal angle in degrees), and ‘V’ (polar angle in degrees).</p>
+</dd>
+</dl>
+<p>None</p>
+<ul class="simple">
+<li><p>Points are scattered in 3D space based on their spherical coordinates
+(radius, azimuthal angle, and polar angle).</p></li>
+<li><p>The ‘d’ values represent the radial distance, ‘Hz’ values represent the
+azimuthal angle in degrees, and ‘V’ values represent the polar angle in
+degrees.</p></li>
+<li><p>Points’ names are annotated near each point in the plot.</p></li>
+</ul>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">point_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Hz&#39;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
+<span class="go">                  &#39;B&#39;: {&#39;d&#39;: 2, &#39;Hz&#39;: 60, &#39;V&#39;: 60}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plot_spherical_3d</span><span class="p">(</span><span class="n">point_data</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.point_distance">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">point_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point_data1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_data2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#point_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.point_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Euclidean distance between two points in 3D space.</p>
+<p>Given two dictionaries representing points with (X, Y, Z) coordinates, this
+function calculates the Euclidean distance between the points. If the
+points are in 2D space, the function calculates the distance in the XY
+plane. If the points have a Z-coordinate, the distance is calculated in 3D.</p>
+<dl class="simple">
+<dt>point_data1<span class="classifier">dict</span></dt><dd><p>Dictionary containing the first point’s coordinates (X, Y, Z).</p>
+</dd>
+<dt>point_data2<span class="classifier">dict</span></dt><dd><p>Dictionary containing the second point’s coordinates (X, Y, Z).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>float</dt><dd><p>The Euclidean distance between the two points.</p>
+</dd>
+</dl>
+<p>If the points are in 2D space (with missing Z-coordinates), the function
+calculates the distance in the XY plane. If both points have Z-coordinates,
+the distance is calculated in 3D space.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">point1</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point2</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">distance</span> <span class="o">=</span> <span class="n">point_distance</span><span class="p">(</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+<span class="go">5.196152422706632</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.point_to_plane_distance">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">point_to_plane_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#point_to_plane_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.point_to_plane_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate perpendicular distance from a 3D point to a plane.</p>
+<p>Given (X, Y, Z) coords of a 3D point and plane coeffs (a, b, c, d), where
+a, b, c are plane’s normal vector components, d is the plane offset,
+this function computes perpendicular distance from point to the plane.</p>
+<dl class="simple">
+<dt>x<span class="classifier">float</span></dt><dd><p>X-coordinate of the 3D point.</p>
+</dd>
+<dt>y<span class="classifier">float</span></dt><dd><p>Y-coordinate of the 3D point.</p>
+</dd>
+<dt>z<span class="classifier">float</span></dt><dd><p>Z-coordinate of the 3D point.</p>
+</dd>
+<dt>plane_params<span class="classifier">tuple</span></dt><dd><p>Coefficients of the plane as (a, b, c, d).</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>float</dt><dd><p>Perpendicular distance from the point to the plane, with directionality.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.project_points_onto_plane">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">project_points_onto_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#project_points_onto_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.project_points_onto_plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project 3D points onto a plane.</p>
+<p>Given a dictionary of 3D points and fitted plane coefficients, this
+function projects each 3D point onto the plane, resulting in corresponding
+3D coordinates on the plane. It also computes perpendicular distances from
+each point to the plane and stores them as ‘planar_offset’ in the output
+dictionary.</p>
+<dl class="simple">
+<dt>points_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing point data with names as keys and (X, Y, Z)
+coordinates as values.</p>
+</dd>
+<dt>plane_params<span class="classifier">tuple</span></dt><dd><p>Coefficients of the fitted plane as (a, b, c, d), where ‘a’, ‘b’, ‘c’
+are normal vector components, and ‘d’ is the plane’s offset.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>dict</dt><dd><p>Dictionary with projected points (names as keys, (X, Y, Z) coordinates
+as values) and ‘planar_offset’ indicating perpendicular distance of
+each point from the fitted plane.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.read_data_from_file">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">read_data_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#read_data_from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.read_data_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from a file and return it as a dictionary.</p>
+<dl class="simple">
+<dt>file_path<span class="classifier">str</span></dt><dd><p>The path to the file containing the data.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>dict</dt><dd><p>A dictionary containing the parsed data with PointIDs as keys and
+associated values including azimuth, zenith angle, distance, Cartesian
+coordinates, and units.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If duplicate PointIDs are found in the data or an invalid data format
+is specified in the header.</p>
+</dd>
+</dl>
+<p>file_path = “data.txt”
+data_dict, file_path = read_data_from_file(file_path)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.reverse_from_XYplane_to_original">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">reverse_from_XYplane_to_original</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point_rotated</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_inv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#reverse_from_XYplane_to_original"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.reverse_from_XYplane_to_original" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse the rotation from the XY plane back to the original 3D CS.</p>
+<p>Given a rotated 2D point, the coefficients of a fitted plane, and the
+inverse rotation matrix, this function converts the rotated 2D point back
+to the original 3D coordinate system. It undoes the previous rotation.</p>
+<dl class="simple">
+<dt>point_rotated<span class="classifier">tuple</span></dt><dd><p>Rotated 2D point in the form (X, Y).</p>
+</dd>
+<dt>plane_params<span class="classifier">tuple</span></dt><dd><p>Coefficients of the fitted plane in the form (a, b, c, d), where ‘a’,
+‘b’, ‘c’ are normal vector components, and ‘d’ is the offset of the
+plane.</p>
+</dd>
+<dt>R_inv<span class="classifier">np.ndarray</span></dt><dd><p>Inverse rotation matrix used to reverse the rotation.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>tuple</dt><dd><p>Original 3D point in the form (X, Y, Z), representing the coordinates
+in the original coordinate system before rotation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.rotate_to_xy_plane">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">rotate_to_xy_plane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plane_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#rotate_to_xy_plane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.rotate_to_xy_plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate points and plane coefficients to align with the XY plane.</p>
+<p>Given a dictionary of 3D points and fitted plane coefficients, this
+function projects each 3D point onto the plane, aligning them with the XY
+plane. It calculates a rotation matrix to align the plane’s normal vector
+with the Z-axis, applies the rotation to both the points and the plane
+coefficients, and computes the perpendicular distances from the rotated
+points to the plane. Results are stored as ‘planar_offset’ in the output
+dictionary.</p>
+<dl class="simple">
+<dt>points_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing point data with names as keys and (X, Y, Z)
+coordinates as values. Each point_data should also contain
+‘coordinate_unit’ key specifying the unit of coordinates.</p>
+</dd>
+<dt>plane_params<span class="classifier">tuple</span></dt><dd><p>Coefficients of the fitted plane as (a, b, c, d), where ‘a’, ‘b’, ‘c’
+are normal vector components, and ‘d’ is the plane’s offset.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>dict</dt><dd><p>Dictionary with rotated points (names as keys, (X, Y, Z) coordinates
+as values) and ‘planar_offset’ indicating perpendicular distance of
+each point from the rotated plane. Also returns the inverse rotation
+matrix R_inv.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.rotation_matrix_from_vectors">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">rotation_matrix_from_vectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#rotation_matrix_from_vectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.rotation_matrix_from_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the rotation matrix that aligns one vector with another.</p>
+<p>Given two 3D vectors v1 and v2, this function calculates the rotation
+matrix that aligns v1 with v2 using Rodrigues’ rotation formula. The
+resulting matrix can be used to rotate points or vectors from the reference
+frame defined by v1 to the reference frame defined by v2.</p>
+<dl class="simple">
+<dt>v1<span class="classifier">numpy.ndarray</span></dt><dd><p>Original 3D vector to be rotated.</p>
+</dd>
+<dt>v2<span class="classifier">numpy.ndarray</span></dt><dd><p>Target 3D vector that v1 should align with.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>3x3 rotation matrix that transforms v1 to align with v2.</p>
+</dd>
+</dl>
+<p>The algorithm used in this function is based on Rodrigues’ rotation
+formula, as described in
+<a class="reference external" href="https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula">https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula</a>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.spherical_to_cartesian">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">spherical_to_cartesian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#spherical_to_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.spherical_to_cartesian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert spherical coordinates to 3D Cartesian coordinates.</p>
+<p>Converts the given spherical coordinates (d, Hz, V) to 3D Cartesian
+coordinates (X, Y, Z).
+d represents the radial distance from the origin to the point.
+Hz represents the horizontal angle measured from the positive x-axis.
+V represents the zenithal angle measured from the positive z-axis.</p>
+<p>d (float): Radial distance in spherical coordinates.
+Hz (float): Horizontal angle in radians.
+V (float): Zenithal angle in radians.</p>
+<p>tuple: A tuple containing (X, Y, Z) in 3D Cartesian coordinates.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spherical_to_cartesian</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.7853981633974483</span><span class="p">,</span> <span class="mf">0.7853981633974483</span><span class="p">)</span>
+<span class="go">(0.5000000000000001, 0.5000000000000001, 0.49999999999999994)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spherical_to_cartesian</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.5707963267948966</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="go">(1.2246467991473532e-16, 2.0, 0.0)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.spherical_to_cartesian_unit">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">spherical_to_cartesian_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle_unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#spherical_to_cartesian_unit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.spherical_to_cartesian_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Spherical to Cartesian coordinates with specified units.</p>
+<p>Converts the given spherical coordinates (d, Hz, V) to 3D Cartesian
+coordinates (x, y, z) in the specified units.</p>
+<p>d (float): Radial distance in spherical coordinates.
+angle_unit (str): Unit of the angles. Choose from ‘rad’, ‘gon’, or ‘deg’.
+Hz (float): Horizontal angle.
+V (float): Zenithal angle.
+d_unit (str): Unit of the radial distance.</p>
+<blockquote>
+<div><p>Choose from ‘um’, ‘mm’, ‘cm’, or ‘m’.</p>
+</div></blockquote>
+<p>tuple: A tuple containing (x, y, z) Cartesian coordinates in the specified
+units.</p>
+<p>ValueError: If an invalid angle unit or radial distance unit is specified.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spherical_to_cartesian_unit</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;rad&#39;</span><span class="p">,</span> <span class="mf">0.7853981633974483</span><span class="p">,</span>
+<span class="go">                                0.7853981633974483, &#39;mm&#39;)</span>
+<span class="go">(0.5000000000000001, 0.5000000000000001, 0.49999999999999994)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spherical_to_cartesian_unit</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;deg&#39;</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s1">&#39;cm&#39;</span><span class="p">)</span>
+<span class="go">(1.2246467991473532e-16, 200.0, 0.0, &#39;mm&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.write_2D_circle_fit_log">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">write_2D_circle_fit_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_details</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#write_2D_circle_fit_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.write_2D_circle_fit_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write fitting results and statistics of a 2D circle fit to a log file.</p>
+<dl class="simple">
+<dt>results_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing the results of the 2D circle fit. The dictionary
+should include various parameters and statistics related to the fit.</p>
+</dd>
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>Dictionary specifying the units to use for distances and angles.</p>
+</dd>
+<dt>log_details<span class="classifier">tuple</span></dt><dd><p>A tuple containing the log file path and log precision settings.</p>
+</dd>
+<dt>log_statistics<span class="classifier">bool, optional</span></dt><dd><p>Flag indicating whether to log the statistics, by default False.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool</dt><dd><p>Returns True if the log file was successfully written.</p>
+</dd>
+</dl>
+<p>This function writes the results of a 2D circle fitting operation and
+associated statistics to a log file. It receives the path to the log file
+and a dictionary containing the results of the 2D circle fit. The
+dictionary should include parameters such as the circle’s center, radius,
+and circle statistics. The log file is formatted with date and time
+information, as well as fitting details and optional statistics if
+requested.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.write_3D_circle_fit_log">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">write_3D_circle_fit_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_details</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#write_3D_circle_fit_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.write_3D_circle_fit_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write fitting results and statistics of a 3D circle fit to a log file.</p>
+<dl class="simple">
+<dt>log_file_path<span class="classifier">str</span></dt><dd><p>Path to the log file.</p>
+</dd>
+<dt>results_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing the results of the 3D circle fit. The dictionary
+should include various parameters and statistics related to the fit.</p>
+</dd>
+<dt>log_statistics<span class="classifier">bool, optional</span></dt><dd><p>Flag indicating whether to log the statistics, by default False.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool</dt><dd><p>Returns True if the log file was successfully written.</p>
+</dd>
+</dl>
+<p>This function writes the results of a 3D circle fitting operation and
+associated statistics to a log file. It receives the path to the log file
+and a dictionary containing the results of the 3D circle fit. The 
+dictionary should include parameters such as the circle’s center, radius,
+normal vector, offsets, plane statistics, circle statistics, etc. The log
+file is formatted with date and time information, as well as fitting 
+details and optional statistics if requested.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.write_circle_fit_log">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">write_circle_fit_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">statistics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#write_circle_fit_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.write_circle_fit_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write fitting results and statistics of a circle fit to a log file.</p>
+<dl class="simple">
+<dt>log_file_path<span class="classifier">str</span></dt><dd><p>Path to the log file.</p>
+</dd>
+<dt>file_path<span class="classifier">str</span></dt><dd><p>Path to the source file.</p>
+</dd>
+<dt>data_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing the data points used for circle fitting.</p>
+</dd>
+<dt>center<span class="classifier">dict</span></dt><dd><p>Dictionary containing the center coordinates of the fitted circle.</p>
+</dd>
+<dt>radius<span class="classifier">float</span></dt><dd><p>Radius of the fitted circle.</p>
+</dd>
+<dt>output_units<span class="classifier">dict</span></dt><dd><p>Dictionary specifying the units used for output.</p>
+</dd>
+<dt>statistics<span class="classifier">dict</span></dt><dd><p>Dictionary containing statistics related to the circle fit.</p>
+</dd>
+<dt>log_statistics<span class="classifier">bool, optional</span></dt><dd><p>Flag indicating whether to log the statistics, by default False.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool</dt><dd><p>Returns True if the log file was successfully written.</p>
+</dd>
+</dl>
+<p>This function writes the results of a circle fitting operation and
+associated statistics to a log file. It receives parameters including
+the path to the log file, the source file, data points, circle center,
+radius, units, and statistics. The function also accepts a flag to
+determine whether to log the statistics or not. The log file is
+formatted with date and time information, as well as fitting details
+and optional statistics if requested.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="functions.write_plane_fit_log">
+<span class="sig-prename descclassname"><span class="pre">functions.</span></span><span class="sig-name descname"><span class="pre">write_plane_fit_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_units</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_details</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_statistics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/functions.html#write_plane_fit_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#functions.write_plane_fit_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write fitting results and statistics of a plane fit to a log file.</p>
+<dl class="simple">
+<dt>result_dict<span class="classifier">dict</span></dt><dd><p>Dictionary containing the results of the plane fit. The dictionary
+should include various parameters and statistics related to the fit.</p>
+</dd>
+<dt>log_details<span class="classifier">tuple</span></dt><dd><p>A tuple containing the log file path and log precision settings.</p>
+</dd>
+<dt>log_statistics<span class="classifier">bool, optional</span></dt><dd><p>Flag indicating whether to log the statistics, by default False.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>bool</dt><dd><p>Returns True if the log file was successfully written.</p>
+</dd>
+</dl>
+<p>This function writes the results of a plane fitting operation and associated
+statistics to a log file. It receives the path to the log file and a
+dictionary containing the results of the plane fit. The dictionary should
+include parameters such as the plane’s parameters, planar offsets, plane
+statistics, and angles from the axis. The log file is formatted with date
+and time information, as well as fitting details and optional statistics if
+requested.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Magnet Referencing Calculations Documentation</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Jana Barker.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/functions.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
