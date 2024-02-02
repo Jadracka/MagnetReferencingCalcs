@@ -404,6 +404,19 @@ def read_data_from_file(file_path):
 
     return data_dict, file_path
 
+def dict_for_Helmert(source_dict):
+    result_dict = {}
+    for point_name, values in source_dict.items():
+        x = values.get('X')
+        y = values.get('Y')
+        z = values.get('Z')
+        
+        # Check if 'X' and 'Y' are available
+        if x is not None and y is not None:
+            result_dict[point_name] = (x, y, z) if z is not None else (x, y)
+    
+    return result_dict
+
 
 def distance_to_mm(unit):
     """
@@ -1683,7 +1696,7 @@ def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
     if not compare_distances(data_dict, points_transformed,
                              point_transform_check_tolerance, 'all'):
         print(f"During the {circle_name} circle fitting process, there has "
-              f"been a difference inpoint-to-point distances between pre-"
+              f"been a difference in point-to-point distances between pre-"
               f" and post-transformation of tested pairs that exceeded "
               f"{point_transform_check_tolerance}mm .\nPlease review"
               f" the detailed statistics and take appropriate "

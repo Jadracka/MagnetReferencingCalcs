@@ -58,6 +58,11 @@ data_file = "Points_circle_test.txt"
 keyence1 = "Keyence_meas_python_input.txt"
 keyence2 = "Keyence_meas_python_input2d.txt"
 LT = "LT_meas_python_input.txt"
+measurement = "Report.xlsx"
+more_inst = "More_inst_rep.xlsx"
+
+Grid_Keyence = "Grid_Keyence.txt"
+Grid_CMM = "Grid_CMM.txt"
 
 # Create the full file path by joining the current directory
 # and the subfolder name
@@ -69,6 +74,11 @@ logfile_path_1 = os.path.join(current_dir, log_folder, log_filename_1)
 keyence2d_path = os.path.join(current_dir, data_folder, keyence2)
 LT_path = os.path.join(current_dir, data_folder, LT)
 
+measurement_file_path = os.path.join(current_dir, data_folder, measurement)
+more_inst_file_path = os.path.join(current_dir, data_folder, more_inst)
+
+Grid_Keyence_path = os.path.join(current_dir, data_folder, Grid_Keyence)
+Grid_CMM_path = os.path.join(current_dir, data_folder, Grid_CMM)
 
 if log and log_statistics:
     log_statistics = True
