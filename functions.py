@@ -54,7 +54,6 @@ def gon_to_radians(gon):
     """
     return gon * (2 * np.pi / 400)
 
-
 def degrees_to_radians(degrees):
     """
     Convert an angle in degrees to radians.
@@ -78,7 +77,6 @@ def degrees_to_radians(degrees):
     1.5707963267948966
     """
     return degrees * (np.pi / 180.0)
-
 
 def cartesian_to_spherical(x, y, z):
     """
@@ -112,7 +110,6 @@ def cartesian_to_spherical(x, y, z):
     phi = np.arctan2(y, x)
     return r, theta, phi
 
-
 def spherical_to_cartesian(d, Hz, V):
     """
     Convert spherical coordinates to 3D Cartesian coordinates.
@@ -144,7 +141,6 @@ def spherical_to_cartesian(d, Hz, V):
     Y = d * np.sin(-Hz) * np.sin(V)
     Z = d * np.cos(V)
     return X, Y, Z
-
 
 def spherical_to_cartesian_unit(d, d_unit, angle_unit, Hz, V):
     """
@@ -206,7 +202,6 @@ def spherical_to_cartesian_unit(d, d_unit, angle_unit, Hz, V):
 
     return x, y, z, 'mm'
 
-
 def get_variable_name(variable):
     """
     Get the name of a variable.
@@ -243,7 +238,6 @@ def get_variable_name(variable):
     for name, value in frame.f_globals.items():
         if value is variable:
             return name
-
 
 def generate_noisy_ellipse_points(a, b, center_x, center_y, num_points,
                                   std_dev):
@@ -297,7 +291,6 @@ def generate_noisy_ellipse_points(a, b, center_x, center_y, num_points,
     y += noise_y
 
     return x, y
-
 
 def read_data_from_file(file_path):
     """
@@ -417,7 +410,6 @@ def dict_for_Helmert(source_dict):
     
     return result_dict
 
-
 def distance_to_mm(unit):
     """
     Convert a coordinate unit to millimeters.
@@ -460,7 +452,6 @@ def distance_to_mm(unit):
     else:
         raise ValueError("Invalid coordinate unit specified.")
 
-
 def get_angle_scale(output_units):
     """
     Calculate the scaler to convert angles to rads based on the output_units.
@@ -488,7 +479,6 @@ def get_angle_scale(output_units):
         raise ValueError(f"Invalid angle unit '{output_units['angles']}' "
                          f"specified.")
 
-
 def get_angle_scale_unit(unit):
     if unit == "gon":
         return 200 / np.pi
@@ -500,7 +490,6 @@ def get_angle_scale_unit(unit):
         return 180.0 / np.pi
     else:
         raise ValueError("Invalid angle unit specified in the header.")
-
 
 def make_residual_stats(residuals: Union[np.ndarray, list, tuple]):
     """
@@ -534,7 +523,6 @@ def make_residual_stats(residuals: Union[np.ndarray, list, tuple]):
         "Median": np.median(residuals)
     }
     return statistics
-
 
 def fit_circle_2d(data_tuple, output_units, log=False,
                   log_statistics=False):
@@ -639,7 +627,6 @@ def fit_circle_2d(data_tuple, output_units, log=False,
 
     return result_dict
 
-
 def circle_residuals_2d(params, x, y):
     """
     Calculate the residuals for 2D circle fitting.
@@ -670,7 +657,6 @@ def circle_residuals_2d(params, x, y):
     """
     center_x, center_y, radius = params
     return np.sqrt((x - center_x)**2 + (y - center_y)**2) - radius
-
 
 def get_distance_scale(output_units):
     """
@@ -712,7 +698,6 @@ def get_distance_scale(output_units):
     else:
         raise ValueError(f"Invalid distance unit '{output_units['distances']}'"
                          f" specified.")
-
 
 def fit_plane(data_tuple, output_units, log_details=False,
               log_statistics=False):
@@ -823,7 +808,6 @@ def fit_plane(data_tuple, output_units, log_details=False,
         write_plane_fit_log(result_dict, output_units, log_details, log_statistics)
     return result_dict
 
-
 def get_plane_angles(normal_vector, output_units):
     """
     Calculate the angles of a plane's normal vector to CS' axes.
@@ -859,7 +843,6 @@ def get_plane_angles(normal_vector, output_units):
     Ry *= angle_scale
     Rz *= angle_scale
     return Rx, Ry, Rz
-
 
 def write_circle_fit_log(log_file_path, file_path, data_dict, center, radius,
                          output_units, statistics, log_statistics=False):
@@ -934,7 +917,6 @@ def write_circle_fit_log(log_file_path, file_path, data_dict, center, radius,
             log_file.write("\n")
     return
 
-
 def check_plane_projection(points, center, normal_vector, tolerance):
     """
     Check if the points lie on fitted plane or need to be projected onto it.
@@ -978,7 +960,6 @@ def check_plane_projection(points, center, normal_vector, tolerance):
     else:
         return False
 
-
 def point_to_plane_distance(x, y, z, plane_params):
     """
     Calculate perpendicular distance from a 3D point to a plane.
@@ -1007,7 +988,6 @@ def point_to_plane_distance(x, y, z, plane_params):
     denominator = np.sqrt(a**2 + b**2 + c**2)
     distance = (a*x + b*y + c*z + d) / denominator
     return distance
-
 
 def project_points_onto_plane(points_dict, plane_params):
     """
@@ -1061,7 +1041,6 @@ def project_points_onto_plane(points_dict, plane_params):
         }
 
     return points_projected
-
 
 def rotate_to_xy_plane(points_dict, plane_params):
     """
@@ -1135,7 +1114,6 @@ def rotate_to_xy_plane(points_dict, plane_params):
 
     return points_transformed, R_inv
 
-
 def reverse_from_XYplane_to_original(point_rotated, plane_params, R_inv):
     """
     Reverse the rotation from the XY plane back to the original 3D CS.
@@ -1183,7 +1161,6 @@ def reverse_from_XYplane_to_original(point_rotated, plane_params, R_inv):
 
     return point_original
 
-
 def rotation_matrix_from_vectors(v1, v2):
     """
     Calculate the rotation matrix that aligns one vector with another.
@@ -1227,7 +1204,6 @@ def rotation_matrix_from_vectors(v1, v2):
 
     return R
 
-
 def plot_points_2d(points):
     """
     Plot givenpoints in 2D.
@@ -1268,7 +1244,6 @@ def plot_points_2d(points):
 
     # Show the plot
     plt.show()
-
 
 def point_distance(point_data1, point_data2):
     """
@@ -1312,7 +1287,6 @@ def point_distance(point_data1, point_data2):
         return np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
     else:
         return np.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
-
 
 def compare_distances(dict1, dict2, tolerance, num_pairs='all', debug=False):
     """
@@ -1425,7 +1399,6 @@ def compare_distances(dict1, dict2, tolerance, num_pairs='all', debug=False):
 
         return discrepancies
 
-
 def plot_cartesian_3d(points_dict, plane_params=None):
     """
     Plot points in a 3D Cartesian CS with optional plane visualization.
@@ -1504,7 +1477,6 @@ def plot_cartesian_3d(points_dict, plane_params=None):
 
     plt.show(block=True)  # Use block=True to open in a separate window
 
-
 def plot_spherical_3d(points_dict):
     """
     Plot 3D points in a spherical coordinate system.
@@ -1561,7 +1533,6 @@ def plot_spherical_3d(points_dict):
     ax.set_zlabel('Z')
 
     plt.show(block=True)  # Use block=True to open in separate window
-
 
 def merge_circle_offsets(dict1, dict2):
     """
@@ -1626,7 +1597,6 @@ def merge_circle_offsets(dict1, dict2):
         }
 
     return merged_dict
-
 
 def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
                   log=False, log_statistics=False):
@@ -1726,7 +1696,6 @@ def fit_circle_3D(data_tuple, output_unit, point_transform_check_tolerance,
 
     return out_dict
 
-
 def write_3D_circle_fit_log(results_dict, output_units, log_details,
                             log_statistics=False):
     """
@@ -1818,7 +1787,6 @@ def write_3D_circle_fit_log(results_dict, output_units, log_details,
                 log_file.write("\n")
     return
 
-
 def calculate_decimal_places(output_units, log_precision):
     """
     Calculate decimal places based on output units and log precision.
@@ -1902,7 +1870,6 @@ def calculate_decimal_places(output_units, log_precision):
         np.log10(1.0 / log_precision_scaled_output_angles)))
 
     return decimal_places_distances+1, decimal_places_angles+1
-
 
 def write_2D_circle_fit_log(results_dict, output_units,
                             log_details, log_statistics=False):
@@ -1991,7 +1958,6 @@ def write_2D_circle_fit_log(results_dict, output_units,
                 log_file.write("\n")
 
     return True  # Indicates successful writing
-
 
 def write_plane_fit_log(result_dict, output_units,
                         log_details, log_statistics=False):

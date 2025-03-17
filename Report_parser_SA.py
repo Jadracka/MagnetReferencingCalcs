@@ -5,6 +5,10 @@ Created on Tue Sep  5 09:40:32 2023
 @author: jbarker
 """
 
+"""
+I DO NOT THINK THIS IS WORKING.
+"""
+
 import config as cg
 import pandas as pd
 
